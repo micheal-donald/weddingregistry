@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lærke & Micheal Wedding Registry</title>
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Dancing+Script:wght@400;700&family=Allura&display=swap" rel="stylesheet">
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script>
+        // Simple icon components to replace Lucide
+        const Heart = () => React.createElement('span', null, '❤️');
+        const Gift = () => React.createElement('span', null, '🎁');
+        const Users = () => React.createElement('span', null, '👥');
+        const Calendar = () => React.createElement('span', null, '📅');
+        const MapPin = () => React.createElement('span', null, '📍');
+        const Check = () => React.createElement('span', null, '✅');
+        const Plus = () => React.createElement('span', null, '+');
+        const Edit = () => React.createElement('span', null, '✏️');
+        const Trash2 = () => React.createElement('span', null, '🗑️');
+        const ExternalLink = () => React.createElement('span', null, '↗️');
+
+        // Simple motion substitute
+        const motion = {
+            div: (props) => React.createElement('div', props),
+            button: (props) => React.createElement('button', props)
+        };
+    </script>
+</head>
+<body>
+    <div id="root"></div>
+    <script type="text/babel" src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Lærke & Micheal Wedding Registry</title>
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Dancing+Script:wght@400;700&family=Allura&display=swap" rel="stylesheet">
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script>
+        // Simple icon components
+        const Heart = () => React.createElement('span', null, '❤️');
+        const Lock = () => React.createElement('span', null, '🔒');
+        const Eye = () => React.createElement('span', null, '👁️');
+        const Users = () => React.createElement('span', null, '👥');
+        const Gift = () => React.createElement('span', null, '🎁');
+    </script>
+</head>
+<body>
+    <div id="root"></div>
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        const AdminApp = () => {
+            const [isLoggedIn, setIsLoggedIn] = useState(false);
+            const [username, setUsername] = useState('');
+            const [password, setPassword] = useState('');
+            const [loginError, setLoginError] = useState('');
+            const [reservations, setReservations] = useState([]);
+            const [loading, setLoading] = useState(false);
+
+            const API_BASE = window.location.origin + '/api';
+
+            // Check if already logged in
+            useEffect(() => {
+                const token = localStorage.getItem('adminToken');
+                if (token) {
+                    setIsLoggedIn(true);
+                    fetchReservations();
+                }
+            }, []);
+
+            const handleLogin = async (e) => {
+                e.preventDefault();
+                setLoading(true);
+                setLoginError('');
+
+                try {
+                    const response = await fetch(`${API_BASE}/admin/login`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ username, password })
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        localStorage.setItem('adminToken', data.token);
+                        setIsLoggedIn(true);
+                        await fetchReservations();
+                    } else {
+                        setLoginError(data.error || 'Login failed');
+                    }
+                } catch (error) {
+                    setLoginError('Network error: ' + error.message);
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            const fetchReservations = async () => {
+                const token = localStorage.getItem('adminToken');
+                if (!token) return;
+
+                try {
+                    const response = await fetch(`${API_BASE}/admin/reservations`, {
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        setReservations(data);
+                    } else if (response.status === 401 || response.status === 403) {
+                        localStorage.removeItem('adminToken');
+                        setIsLoggedIn(false);
+                    }
+                } catch (error) {
+                    console.error('Error fetching reservations:', error);
+                }
+            };
+
+            const handleLogout = () => {
+                localStorage.removeItem('adminToken');
+                setIsLoggedIn(false);
+                setReservations([]);
+            };
+
+            if (!isLoggedIn) {
+                return (
+                    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-rose-50 to-purple-50 flex items-center justify-center">
+                        <div className="bg-white rounded-2xl shadow-lg p-8 max-w-md w-full mx-4">
+                            <div className="text-center mb-8">
+                                <div className="w-16 h-16 bg-gradient-to-br from-pink-500 to-rose-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <Lock className="w-8 h-8 text-white" />
+                                </div>
+                                <h1 className="text-2xl font-bold text-gray-800 mb-2">Admin Login</h1>
+                                <p className="text-gray-600" style={{fontFamily: 'Great Vibes', fontSize: '1.2rem'}}>
+                                    Lærke & Micheal Wedding Registry
+                                </p>
+                            </div>
+
+                            <form onSubmit={handleLogin} className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Username</label>
+                                    <input
+                                        type="text"
+                                        value={username}
+                                        onChange={(e) => setUsername(e.target.value)}
+                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                                        placeholder="Username"
+                                        required
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                                    <input
+                                        type="password"
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                                        placeholder="Password"
+                                        required
+                                    />
+                                </div>
+
+                                {loginError && (
+                                    <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                                        {loginError}
+                                    </div>
+                                )}
+
+                                <button
+                                    type="submit"
+                                    disabled={loading}
+                                    className="w-full bg-gradient-to-r from-pink-500 to-rose-500 text-white py-3 rounded-lg font-semibold hover:shadow-lg transition-all duration-300 disabled:opacity-50"
+                                >
+                                    {loading ? 'Logging in...' : 'Login'}
+                                </button>
+                            </form>
+
+                        </div>
+                    </div>
+                );
+            }
+
+            return (
+                <div className="min-h-screen bg-gradient-to-br from-pink-50 via-rose-50 to-purple-50">
+                    {/* Header */}
+                    <header className="bg-white/80 backdrop-blur-sm border-b border-pink-100 sticky top-0 z-50">
+                        <div className="max-w-6xl mx-auto px-4 py-6">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center space-x-3">
+                                    <div className="w-12 h-12 bg-gradient-to-br from-pink-500 to-rose-500 rounded-full flex items-center justify-center">
+                                        <Heart className="w-6 h-6 text-white" />
+                                    </div>
+                                    <div>
+                                        <h1 className="text-2xl font-bold text-gray-800" style={{fontFamily: 'Great Vibes'}}>
+                                            Admin Dashboard
+                                        </h1>
+                                        <p className="text-pink-600 font-medium">Wedding Registry Management</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-center space-x-4">
+                                    <a
+                                        href="/"
+                                        className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg font-semibold hover:bg-gray-200 transition-colors"
+                                    >
+                                        View Registry
+                                    </a>
+                                    <button
+                                        onClick={handleLogout}
+                                        className="bg-red-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-red-600 transition-colors"
+                                    >
+                                        Logout
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </header>
+
+                    {/* Stats */}
+                    <section className="py-8 px-4">
+                        <div className="max-w-6xl mx-auto">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                                <div className="bg-white rounded-xl shadow-lg p-6 text-center">
+                                    <Gift className="w-8 h-8 mx-auto mb-2" />
+                                    <div className="text-2xl font-bold text-gray-800">{reservations.length}</div>
+                                    <div className="text-gray-600">Total Reservations</div>
+                                </div>
+                                <div className="bg-white rounded-xl shadow-lg p-6 text-center">
+                                    <Users className="w-8 h-8 mx-auto mb-2" />
+                                    <div className="text-2xl font-bold text-gray-800">
+                                        {new Set(reservations.map(r => r.guest_name)).size}
+                                    </div>
+                                    <div className="text-gray-600">Unique Guests</div>
+                                </div>
+                                <div className="bg-white rounded-xl shadow-lg p-6 text-center">
+                                    <span className="text-2xl">💰</span>
+                                    <div className="text-2xl font-bold text-gray-800">
+                                        KES {reservations.reduce((sum, r) => sum + r.gift_price, 0).toLocaleString()}
+                                    </div>
+                                    <div className="text-gray-600">Total Value Reserved</div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Reservations List */}
+                    <section className="py-4 px-4">
+                        <div className="max-w-6xl mx-auto">
+                            <h2 className="text-2xl font-bold text-gray-800 mb-6">All Reservations</h2>
+
+                            {reservations.length === 0 ? (
+                                <div className="bg-white rounded-xl shadow-lg p-8 text-center">
+                                    <div className="text-4xl mb-4">🎁</div>
+                                    <h3 className="text-xl font-semibold text-gray-800 mb-2">No Reservations Yet</h3>
+                                    <p className="text-gray-600">When guests reserve gifts, they'll appear here.</p>
+                                </div>
+                            ) : (
+                                <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+                                    <div className="overflow-x-auto">
+                                        <table className="w-full">
+                                            <thead className="bg-gray-50">
+                                                <tr>
+                                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                        Gift
+                                                    </th>
+                                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                        Guest
+                                                    </th>
+                                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                        Price
+                                                    </th>
+                                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                        Reserved
+                                                    </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="bg-white divide-y divide-gray-200">
+                                                {reservations.map((reservation) => (
+                                                    <tr key={reservation.id} className="hover:bg-gray-50">
+                                                        <td className="px-6 py-4 whitespace-nowrap">
+                                                            <div>
+                                                                <div className="text-sm font-medium text-gray-900">
+                                                                    {reservation.gift_name}
+                                                                </div>
+                                                                <div className="text-sm text-gray-500">
+                                                                    {reservation.gift_category}
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-6 py-4 whitespace-nowrap">
+                                                            <div>
+                                                                <div className="text-sm font-medium text-gray-900">
+                                                                    {reservation.guest_name}
+                                                                </div>
+                                                                {reservation.guest_email && (
+                                                                    <div className="text-sm text-gray-500">
+                                                                        {reservation.guest_email}
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                            {reservation.gift_name === 'Money' ? 'Any Amount' :
+                                                             `KES ${reservation.gift_price.toLocaleString()}`}
+                                                        </td>
+                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                            {new Date(reservation.reserved_at).toLocaleDateString('en-US', {
+                                                                year: 'numeric',
+                                                                month: 'short',
+                                                                day: 'numeric',
+                                                                hour: '2-digit',
+                                                                minute: '2-digit'
+                                                            })}
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </section>
+
+                    {/* Footer */}
+                    <footer className="bg-white/80 backdrop-blur-sm border-t border-pink-100 py-8 px-4 mt-16">
+                        <div className="max-w-4xl mx-auto text-center">
+                            <div className="flex items-center justify-center space-x-3 mb-4">
+                                <Heart className="w-6 h-6 text-pink-500" />
+                                <h3 className="text-xl font-bold text-gray-800">Admin Dashboard</h3>
+                                <Heart className="w-6 h-6 text-pink-500" />
+                            </div>
+                            <p className="text-gray-600 mb-4">
+                                Manage your wedding registry reservations
+                            </p>
+                            <div className="text-sm text-gray-500" style={{fontFamily: 'Great Vibes'}}>
+                                Lærke & Micheal • February 14, 2026 • Limuru, Kenya
+                            </div>
+                        </div>
+                    </footer>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<AdminApp />);
+    </script>
+</body>
+</html>
