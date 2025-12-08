@@ -18,7 +18,14 @@ app.use(express.static(path.join(__dirname, '../')));
 // Database connection
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
-    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+    ssl: {
+        rejectUnauthorized: false
+    }
+});
+
+// Test connection and log errors
+pool.on('error', (err) => {
+    console.error('Unexpected database error:', err);
 });
 
 // Helper to query db
