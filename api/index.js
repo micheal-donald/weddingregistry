@@ -6,6 +6,12 @@ const jwt = require('jsonwebtoken');
 const bodyParser = require('body-parser');
 const path = require('path');
 
+// Bypass SSL certificate validation for Supabase in production
+// This must be set before creating the database pool
+if (process.env.DATABASE_URL) {
+    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+}
+
 const app = express();
 const PORT = process.env.PORT || 3001;
 const JWT_SECRET = process.env.JWT_SECRET || 'wedding-registry-secret-2026';
