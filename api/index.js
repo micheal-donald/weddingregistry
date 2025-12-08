@@ -16,12 +16,21 @@ app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, '../')));
 
 // Database connection
-const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: process.env.DATABASE_URL ? {
-        rejectUnauthorized: false
-    } : false
-});
+// For Supabase, we need to handle SSL properly
+const dbConfig = {
+    connectionString: process.env.DATABASE_URL
+};
+
+// Only add SSL config if DATABASE_URL exists (production)
+if (process.env.DATABASE_URL) {
+    dbConfig.ssl = {
+        rejectUnauthorized: false,
+        // This helps with self-signed certificate chains
+        checkServerIdentity: () => undefined
+    };
+}
+
+const pool = new Pool(dbConfig);
 
 // Test connection and log errors
 pool.on('error', (err) => {
