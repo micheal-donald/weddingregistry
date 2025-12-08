@@ -349,12 +349,12 @@ app.delete('/api/admin/gifts/:id', authenticateToken, async (req, res) => {
     }
 });
 
-// Serve React app
-app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../index.html'));
-});
+// Export for Vercel serverless
+module.exports = app;
 
-// Start server
-app.listen(PORT, () => {
-    console.log(`🎉 Wedding Registry Server running on port ${PORT}`);
-});
+// Start server only if running locally (not in Vercel)
+if (require.main === module) {
+    app.listen(PORT, () => {
+        console.log(`🎉 Wedding Registry Server running on port ${PORT}`);
+    });
+}
