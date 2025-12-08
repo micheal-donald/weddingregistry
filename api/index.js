@@ -18,9 +18,9 @@ app.use(express.static(path.join(__dirname, '../')));
 // Database connection
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
-    ssl: {
+    ssl: process.env.DATABASE_URL ? {
         rejectUnauthorized: false
-    }
+    } : false
 });
 
 // Test connection and log errors
