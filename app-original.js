@@ -260,264 +260,264 @@ const App = () => {
             </h2>
             <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
               Help us start our new life together with gifts that will make our house a home.
-            </br> We are not deadset on the brands of the gifts - they do not have to be from the exact link, but whichever types you can find in Denmark/Kenya/wherever you are!</motion.div>
-        </p>
+              <br /> We are not deadset on the brands of the gifts - they do not have to be from the exact link, but whichever types you can find in Denmark/Kenya/wherever you are!
+            </p>
 
-        <div className="flex flex-wrap justify-center items-center gap-8 text-gray-700 mb-12">
-          <div className="flex items-center space-x-2">
-            <Calendar className="w-5 h-5 text-pink-500" />
-            <span>February 14, 2026</span>
-          </div>
-          <div className="flex items-center space-x-2">
-            <MapPin className="w-5 h-5 text-pink-500" />
-            <span>Limuru, Kenya</span>
-          </div>
-          <div className="flex items-center space-x-2">
-            <Users className="w-5 h-5 text-pink-500" />
-            <span>{items.filter(item => item.reserved).length} of {items.length} gifts reserved</span>
-          </div>
-        </div>
-      </motion.div>
-    </div>
-      </section >
-
-  {/* Registry Items */ }
-  < section className = "py-12 px-4" >
-    <div className="max-w-6xl mx-auto">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {items.map((item, index) => (
-          <motion.div
-            key={item.id}
-            className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300"
-          >
-            <div className="relative">
-              <img
-                src={item.image}
-                alt={item.name}
-                className="w-full h-48 object-cover"
-              />
-              {item.reserved && (
-                <div className="absolute top-4 left-4 bg-green-500 text-white px-3 py-1 rounded-full text-sm font-semibold flex items-center space-x-1">
-                  <Check className="w-4 h-4" />
-                  <span>Reserved</span>
-                </div>
-              )}
-              <div className="absolute top-4 right-4">
-                <button
-                  onClick={() => handleEditItem(item)}
-                  className="bg-white/80 backdrop-blur-sm p-2 rounded-full hover:bg-white transition-colors mr-2"
-                >
-                  <Edit className="w-4 h-4 text-gray-600" />
-                </button>
-                <button
-                  onClick={() => handleDeleteItem(item.id)}
-                  className="bg-white/80 backdrop-blur-sm p-2 rounded-full hover:bg-white transition-colors"
-                >
-                  <Trash2 className="w-4 h-4 text-red-500" />
-                </button>
+            <div className="flex flex-wrap justify-center items-center gap-8 text-gray-700 mb-12">
+              <div className="flex items-center space-x-2">
+                <Calendar className="w-5 h-5 text-pink-500" />
+                <span>February 14, 2026</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <MapPin className="w-5 h-5 text-pink-500" />
+                <span>Limuru, Kenya</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Users className="w-5 h-5 text-pink-500" />
+                <span>{items.filter(item => item.reserved).length} of {items.length} gifts reserved</span>
               </div>
             </div>
+          </motion.div>
+        </div>
+      </section>
 
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-pink-600 font-semibold bg-pink-50 px-3 py-1 rounded-full">
-                  {item.category}
-                </span>
-                <span className="text-2xl font-bold text-gray-800">
-                  {item.name === "Money" ? "Any Amount" : `KES ${item.price.toLocaleString()}`}
-                </span>
-              </div>
-
-              <h3 className="text-lg font-semibold text-gray-800 mb-3">{item.name}</h3>
-
-              {item.reserved ? (
-                <div className="mb-4">
-                  <p className="text-sm text-gray-600">Reserved by:</p>
-                  <p className="font-semibold text-gray-800">{item.reservedBy}</p>
-                  <button
-                    onClick={() => handleUnreserveItem(item.id)}
-                    className="mt-2 text-pink-600 hover:text-pink-700 text-sm font-medium"
-                  >
-                    Unreserve
-                  </button>
+      {/* Registry Items */}
+      <section className="py-12 px-4">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {items.map((item, index) => (
+              <motion.div
+                key={item.id}
+                className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300"
+              >
+                <div className="relative">
+                  <img
+                    src={item.image}
+                    alt={item.name}
+                    className="w-full h-48 object-cover"
+                  />
+                  {item.reserved && (
+                    <div className="absolute top-4 left-4 bg-green-500 text-white px-3 py-1 rounded-full text-sm font-semibold flex items-center space-x-1">
+                      <Check className="w-4 h-4" />
+                      <span>Reserved</span>
+                    </div>
+                  )}
+                  <div className="absolute top-4 right-4">
+                    <button
+                      onClick={() => handleEditItem(item)}
+                      className="bg-white/80 backdrop-blur-sm p-2 rounded-full hover:bg-white transition-colors mr-2"
+                    >
+                      <Edit className="w-4 h-4 text-gray-600" />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteItem(item.id)}
+                      className="bg-white/80 backdrop-blur-sm p-2 rounded-full hover:bg-white transition-colors"
+                    >
+                      <Trash2 className="w-4 h-4 text-red-500" />
+                    </button>
+                  </div>
                 </div>
-              ) : (
-                <div className="mb-4">
-                  {selectedItem === item.id ? (
-                    <div className="space-y-3">
-                      <input
-                        type="text"
-                        placeholder="Your name"
-                        value={guestName}
-                        onChange={(e) => setGuestName(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
-                      />
+
+                <div className="p-6">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm text-pink-600 font-semibold bg-pink-50 px-3 py-1 rounded-full">
+                      {item.category}
+                    </span>
+                    <span className="text-2xl font-bold text-gray-800">
+                      {item.name === "Money" ? "Any Amount" : `KES ${item.price.toLocaleString()}`}
+                    </span>
+                  </div>
+
+                  <h3 className="text-lg font-semibold text-gray-800 mb-3">{item.name}</h3>
+
+                  {item.reserved ? (
+                    <div className="mb-4">
+                      <p className="text-sm text-gray-600">Reserved by:</p>
+                      <p className="font-semibold text-gray-800">{item.reservedBy}</p>
                       <button
-                        onClick={() => handleReserveItem(item.id)}
-                        disabled={!guestName}
-                        className="w-full bg-green-500 text-white py-2 rounded-lg font-semibold hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        onClick={() => handleUnreserveItem(item.id)}
+                        className="mt-2 text-pink-600 hover:text-pink-700 text-sm font-medium"
                       >
-                        Confirm Reservation
-                      </button>
-                      <button
-                        onClick={() => {
-                          setSelectedItem(null);
-                          setGuestName('');
-                        }}
-                        className="w-full text-gray-600 py-2 rounded-lg font-semibold hover:bg-gray-50 transition-colors"
-                      >
-                        Cancel
+                        Unreserve
                       </button>
                     </div>
                   ) : (
-                    <button
-                      onClick={() => setSelectedItem(item.id)}
-                      className="w-full bg-gradient-to-r from-pink-500 to-rose-500 text-white py-3 rounded-lg font-semibold hover:shadow-lg transition-all duration-300"
+                    <div className="mb-4">
+                      {selectedItem === item.id ? (
+                        <div className="space-y-3">
+                          <input
+                            type="text"
+                            placeholder="Your name"
+                            value={guestName}
+                            onChange={(e) => setGuestName(e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                          />
+                          <button
+                            onClick={() => handleReserveItem(item.id)}
+                            disabled={!guestName}
+                            className="w-full bg-green-500 text-white py-2 rounded-lg font-semibold hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                          >
+                            Confirm Reservation
+                          </button>
+                          <button
+                            onClick={() => {
+                              setSelectedItem(null);
+                              setGuestName('');
+                            }}
+                            className="w-full text-gray-600 py-2 rounded-lg font-semibold hover:bg-gray-50 transition-colors"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => setSelectedItem(item.id)}
+                          className="w-full bg-gradient-to-r from-pink-500 to-rose-500 text-white py-3 rounded-lg font-semibold hover:shadow-lg transition-all duration-300"
+                        >
+                          Reserve This Gift
+                        </button>
+                      )}
+                    </div>
+                  )}
+
+                  {item.affiliateLink ? (
+                    <a
+                      href={item.affiliateLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-center space-x-2 text-pink-600 hover:text-pink-700 font-medium transition-colors"
                     >
-                      Reserve This Gift
-                    </button>
+                      <span>View Product</span>
+                      <ExternalLink className="w-4 h-4" />
+                    </a>
+                  ) : (
+                    <div className="flex items-center justify-center space-x-2 text-gray-400 font-medium">
+                      <span>{item.name === "Money" ? "Cash Gift" : "Contact for Details"}</span>
+                    </div>
                   )}
                 </div>
-              )}
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
 
-              {item.affiliateLink ? (
-                <a
-                  href={item.affiliateLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center space-x-2 text-pink-600 hover:text-pink-700 font-medium transition-colors"
-                >
-                  <span>View Product</span>
-                  <ExternalLink className="w-4 h-4" />
-                </a>
-              ) : (
-                <div className="flex items-center justify-center space-x-2 text-gray-400 font-medium">
-                  <span>{item.name === "Money" ? "Cash Gift" : "Contact for Details"}</span>
+      {/* Add/Edit Item Modal */}
+      {
+        (showAddForm || editingItem) && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+            <motion.div
+              className="bg-white rounded-2xl p-8 max-w-md w-full max-h-[90vh] overflow-y-auto"
+            >
+              <h3 className="text-2xl font-bold text-gray-800 mb-6">
+                {editingItem ? 'Edit Gift' : 'Add New Gift'}
+              </h3>
+
+              <form onSubmit={editingItem ? handleUpdateItem : handleAddItem} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Gift Name</label>
+                  <input
+                    type="text"
+                    value={newItem.name}
+                    onChange={(e) => setNewItem({ ...newItem, name: e.target.value })}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                    required
+                  />
                 </div>
-              )}
-            </div>
-          </motion.div>
-        ))}
-      </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Price</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={newItem.price}
+                    onChange={(e) => setNewItem({ ...newItem, price: e.target.value })}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Image URL</label>
+                  <input
+                    type="url"
+                    value={newItem.image}
+                    onChange={(e) => setNewItem({ ...newItem, image: e.target.value })}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Affiliate Link</label>
+                  <input
+                    type="url"
+                    value={newItem.affiliateLink}
+                    onChange={(e) => setNewItem({ ...newItem, affiliateLink: e.target.value })}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
+                  <select
+                    value={newItem.category}
+                    onChange={(e) => setNewItem({ ...newItem, category: e.target.value })}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                  >
+                    {categories.map(category => (
+                      <option key={category} value={category}>{category}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="flex space-x-4 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowAddForm(false);
+                      setEditingItem(null);
+                      setNewItem({ name: '', price: '', image: '', affiliateLink: '', category: 'Kitchen' });
+                    }}
+                    className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex-1 px-6 py-3 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-lg font-semibold hover:shadow-lg transition-all duration-300"
+                  >
+                    {editingItem ? 'Update Gift' : 'Add Gift'}
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )
+      }
+
+      {/* Footer */}
+      <footer className="bg-white/80 backdrop-blur-sm border-t border-pink-100 py-12 px-4 mt-16">
+        <div className="max-w-4xl mx-auto text-center">
+          <div className="flex items-center justify-center space-x-3 mb-6">
+            <Heart className="w-8 h-8 text-pink-500" />
+            <h3 className="text-2xl font-bold text-gray-800">Thank You</h3>
+            <Heart className="w-8 h-8 text-pink-500" />
+          </div>
+          <p className="text-gray-600 mb-6">
+            Your love and support mean the world to us. We can't wait to celebrate with you!
+          </p>
+          <div className="flex items-center justify-center space-x-6 text-sm text-gray-500">
+            <span style={{ fontFamily: 'Great Vibes', fontSize: '1.2rem' }}>Lærke & Micheal</span>
+            <span>•</span>
+            <span>February 14, 2026</span>
+            <span>•</span>
+            <span>Limuru, Kenya</span>
+          </div>
+        </div>
+      </footer>
     </div>
-      </section >
-
-  {/* Add/Edit Item Modal */ }
-{
-  (showAddForm || editingItem) && (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-      <motion.div
-        className="bg-white rounded-2xl p-8 max-w-md w-full max-h-[90vh] overflow-y-auto"
-      >
-        <h3 className="text-2xl font-bold text-gray-800 mb-6">
-          {editingItem ? 'Edit Gift' : 'Add New Gift'}
-        </h3>
-
-        <form onSubmit={editingItem ? handleUpdateItem : handleAddItem} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Gift Name</label>
-            <input
-              type="text"
-              value={newItem.name}
-              onChange={(e) => setNewItem({ ...newItem, name: e.target.value })}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Price</label>
-            <input
-              type="number"
-              step="0.01"
-              value={newItem.price}
-              onChange={(e) => setNewItem({ ...newItem, price: e.target.value })}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Image URL</label>
-            <input
-              type="url"
-              value={newItem.image}
-              onChange={(e) => setNewItem({ ...newItem, image: e.target.value })}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Affiliate Link</label>
-            <input
-              type="url"
-              value={newItem.affiliateLink}
-              onChange={(e) => setNewItem({ ...newItem, affiliateLink: e.target.value })}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
-            <select
-              value={newItem.category}
-              onChange={(e) => setNewItem({ ...newItem, category: e.target.value })}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
-            >
-              {categories.map(category => (
-                <option key={category} value={category}>{category}</option>
-              ))}
-            </select>
-          </div>
-
-          <div className="flex space-x-4 pt-4">
-            <button
-              type="button"
-              onClick={() => {
-                setShowAddForm(false);
-                setEditingItem(null);
-                setNewItem({ name: '', price: '', image: '', affiliateLink: '', category: 'Kitchen' });
-              }}
-              className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="flex-1 px-6 py-3 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-lg font-semibold hover:shadow-lg transition-all duration-300"
-            >
-              {editingItem ? 'Update Gift' : 'Add Gift'}
-            </button>
-          </div>
-        </form>
-      </motion.div>
-    </div>
-  )
-}
-
-{/* Footer */ }
-<footer className="bg-white/80 backdrop-blur-sm border-t border-pink-100 py-12 px-4 mt-16">
-  <div className="max-w-4xl mx-auto text-center">
-    <div className="flex items-center justify-center space-x-3 mb-6">
-      <Heart className="w-8 h-8 text-pink-500" />
-      <h3 className="text-2xl font-bold text-gray-800">Thank You</h3>
-      <Heart className="w-8 h-8 text-pink-500" />
-    </div>
-    <p className="text-gray-600 mb-6">
-      Your love and support mean the world to us. We can't wait to celebrate with you!
-    </p>
-    <div className="flex items-center justify-center space-x-6 text-sm text-gray-500">
-      <span style={{ fontFamily: 'Great Vibes', fontSize: '1.2rem' }}>Lærke & Micheal</span>
-      <span>•</span>
-      <span>February 14, 2026</span>
-      <span>•</span>
-      <span>Limuru, Kenya</span>
-    </div>
-  </div>
-</footer>
-    </div >
   );
 };
 
