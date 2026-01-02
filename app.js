@@ -28,7 +28,36 @@ const App = () => {
   const [reservationPercentage, setReservationPercentage] = useState(100);
   const [reservationAmount, setReservationAmount] = useState(0);
 
+  // Currency state
+  const [currency, setCurrency] = useState(() => {
+    // Load currency preference from localStorage
+    return localStorage.getItem('preferredCurrency') || 'KES';
+  });
+
+  // Exchange rate constant (1 KES = 0.05 DKK)
+  const KES_TO_DKK_RATE = 0.05;
+
   const categories = ['Kitchen', 'Electronics', 'Audio', 'Outdoor', 'Home', 'Appliances', 'Other'];
+
+  // Currency utility functions
+  const formatPrice = (price, curr = currency) => {
+    if (curr === 'DKK') {
+      const dkkPrice = price * KES_TO_DKK_RATE;
+      return `${Math.round(dkkPrice).toLocaleString('da-DK')} kr`;
+    }
+    return `KES ${price.toLocaleString()}`;
+  };
+
+  const getCurrencySymbol = (curr = currency) => {
+    return curr === 'DKK' ? 'kr' : 'KES';
+  };
+
+  const convertToKES = (amount, fromCurrency) => {
+    if (fromCurrency === 'DKK') {
+      return amount / KES_TO_DKK_RATE;
+    }
+    return amount;
+  };
 
   // API base URL
   const API_BASE = window.location.origin + '/api';
@@ -78,6 +107,16 @@ const App = () => {
     const token = localStorage.getItem('adminToken');
     setIsAdmin(!!token);
   }, []);
+
+  // Save currency preference to localStorage
+  useEffect(() => {
+    localStorage.setItem('preferredCurrency', currency);
+  }, [currency]);
+
+  // Toggle currency
+  const toggleCurrency = () => {
+    setCurrency(prev => prev === 'KES' ? 'DKK' : 'KES');
+  };
 
   const handleAddItem = async (e) => {
     e.preventDefault();
@@ -223,7 +262,7 @@ const App = () => {
 
           const isPartial = reservationPercentage < 100;
           const message = isPartial
-            ? `You're a star! Your ${reservationPercentage.toFixed(0)}% (KES ${result.amountReserved.toFixed(0)}) means the world to us 💕`
+            ? `You're a star! Your ${reservationPercentage.toFixed(0)}% (${formatPrice(result.amountReserved)}) means the world to us 💕`
             : 'You\'re amazing! Thank you from our hearts 💕✨';
           alert(message);
         } else {
@@ -313,10 +352,23 @@ const App = () => {
                 <Heart className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-gray-800" style={{fontFamily: 'Great Vibes', fontSize: '2.5rem'}}>Lærke & Micheal</h1>
+                <h1 className="text-3xl font-bold text-gray-800" style={{ fontFamily: 'Great Vibes', fontSize: '2.5rem' }}>Lærke & Micheal</h1>
                 <p className="text-pink-600 font-medium">Wedding Registry</p>
               </div>
             </motion.div>
+
+            {/* Currency Toggle */}
+            <motion.button
+              onClick={toggleCurrency}
+              className="bg-white/90 backdrop-blur-sm border-2 border-pink-200 px-4 py-2 rounded-full font-semibold hover:shadow-lg transition-all duration-300 flex items-center space-x-2 hover:border-pink-300"
+              title={`Switch to ${currency === 'KES' ? 'Danish Krone' : 'Kenyan Shilling'}`}
+            >
+              <span className="text-lg">{currency === 'KES' ? '🇰🇪' : '🇩🇰'}</span>
+              <span className="text-sm font-bold text-gray-700">{currency}</span>
+              <span className="text-xs text-gray-500">→</span>
+              <span className="text-lg opacity-50">{currency === 'KES' ? '🇩🇰' : '🇰🇪'}</span>
+            </motion.button>
+
             {isAdmin && (
               <motion.button
                 onClick={() => setShowAddForm(true)}
@@ -339,6 +391,7 @@ const App = () => {
             </h2>
             <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
               Help us fill our first home with love, laughter, and all the lovely things ✨
+              <br /> We are not deadset on the brands of the gifts - they do not have to be from the exact link, but whichever types you can find in Denmark/Kenya/wherever you are!
             </p>
 
             <div className="flex flex-wrap justify-center items-center gap-8 text-gray-700 mb-12">
@@ -404,7 +457,7 @@ const App = () => {
                       {item.category}
                     </span>
                     <span className="text-lg font-medium text-gray-700">
-                      {item.name === "Money" ? "Any Amount" : `KES ${item.price.toLocaleString()}`}
+                      {item.name === "Money" ? "Any Amount" : formatPrice(item.price)}
                     </span>
                   </div>
 
@@ -518,138 +571,138 @@ const App = () => {
                   {((!item.allowPartialReservations && item.quantity === 1 && !item.reserved) ||
                     (!item.allowPartialReservations && item.quantity > 1 && item.reservedCount < item.quantity) ||
                     (item.allowPartialReservations && item.reservedPercentage < 100)) && (
-                    <div className="mb-4">
-                      {selectedItem === item.id ? (
-                        <div className="space-y-4 bg-gradient-to-r from-pink-50 to-rose-50 p-4 rounded-xl border border-pink-100">
-                          <div className="text-center">
-                            <h4 className="text-lg font-semibold text-gray-800 mb-1">✨ Share Your Love</h4>
-                            <p className="text-sm text-gray-600">Every bit helps build our dream home!</p>
-                          </div>
-
-                          <input
-                            type="text"
-                            placeholder="Your name *"
-                            value={guestName}
-                            onChange={(e) => setGuestName(e.target.value)}
-                            className="w-full px-3 py-2 border border-pink-200 rounded-lg focus:ring-2 focus:ring-pink-400 focus:border-transparent bg-white"
-                            required
-                          />
-                          <input
-                            type="email"
-                            placeholder="Your email (optional)"
-                            value={guestEmail}
-                            onChange={(e) => setGuestEmail(e.target.value)}
-                            className="w-full px-3 py-2 border border-pink-200 rounded-lg focus:ring-2 focus:ring-pink-400 focus:border-transparent bg-white"
-                          />
-
-                          {/* Cute amount selector - only for partial reservation items */}
-                          {item.allowPartialReservations && (
-                          <div className="bg-white rounded-lg p-4 border border-pink-200">
-                            <div className="flex items-center justify-between mb-3">
-                              <span className="text-sm font-medium text-gray-700">💰 Your contribution</span>
-                              <span className="text-sm font-normal text-gray-600">
-                                {reservationPercentage.toFixed(0)}% = KES {reservationAmount.toFixed(0)}
-                              </span>
+                      <div className="mb-4">
+                        {selectedItem === item.id ? (
+                          <div className="space-y-4 bg-gradient-to-r from-pink-50 to-rose-50 p-4 rounded-xl border border-pink-100">
+                            <div className="text-center">
+                              <h4 className="text-lg font-semibold text-gray-800 mb-1">✨ Share Your Love</h4>
+                              <p className="text-sm text-gray-600">Every bit helps build our dream home!</p>
                             </div>
 
-                            {/* Cute slider */}
-                            <div className="relative mb-4">
-                              <input
-                                type="range"
-                                min="1"
-                                max={100 - (item.reservedPercentage || 0)}
-                                value={reservationPercentage}
-                                onChange={(e) => {
-                                  const newPercentage = parseFloat(e.target.value);
-                                  handlePercentageChange(newPercentage, item.price);
-                                }}
-                                className="w-full h-2 bg-gradient-to-r from-pink-200 to-rose-200 rounded-lg appearance-none cursor-pointer slider-pink"
-                                style={{
-                                  background: `linear-gradient(to right, #f472b6 0%, #f472b6 ${(reservationPercentage / (100 - (item.reservedPercentage || 0))) * 100}%, #fce7f3 ${(reservationPercentage / (100 - (item.reservedPercentage || 0))) * 100}%, #fce7f3 100%)`
-                                }}
-                              />
-                              <div className="flex justify-between text-xs text-gray-500 mt-1">
-                                <span>1%</span>
-                                <span className="text-pink-600 font-medium">
-                                  {reservationPercentage < 100 ? "💕 Sharing is caring!" : "🎉 Full gift!"}
-                                </span>
-                                <span>{100 - (item.reservedPercentage || 0)}%</span>
+                            <input
+                              type="text"
+                              placeholder="Your name *"
+                              value={guestName}
+                              onChange={(e) => setGuestName(e.target.value)}
+                              className="w-full px-3 py-2 border border-pink-200 rounded-lg focus:ring-2 focus:ring-pink-400 focus:border-transparent bg-white"
+                              required
+                            />
+                            <input
+                              type="email"
+                              placeholder="Your email (optional)"
+                              value={guestEmail}
+                              onChange={(e) => setGuestEmail(e.target.value)}
+                              className="w-full px-3 py-2 border border-pink-200 rounded-lg focus:ring-2 focus:ring-pink-400 focus:border-transparent bg-white"
+                            />
+
+                            {/* Cute amount selector - only for partial reservation items */}
+                            {item.allowPartialReservations && (
+                              <div className="bg-white rounded-lg p-4 border border-pink-200">
+                                <div className="flex items-center justify-between mb-3">
+                                  <span className="text-sm font-medium text-gray-700">💰 Your contribution</span>
+                                  <span className="text-sm font-normal text-gray-600">
+                                    {reservationPercentage.toFixed(0)}% = {formatPrice(reservationAmount)}
+                                  </span>
+                                </div>
+
+                                {/* Cute slider */}
+                                <div className="relative mb-4">
+                                  <input
+                                    type="range"
+                                    min="1"
+                                    max={100 - (item.reservedPercentage || 0)}
+                                    value={reservationPercentage}
+                                    onChange={(e) => {
+                                      const newPercentage = parseFloat(e.target.value);
+                                      handlePercentageChange(newPercentage, item.price);
+                                    }}
+                                    className="w-full h-2 bg-gradient-to-r from-pink-200 to-rose-200 rounded-lg appearance-none cursor-pointer slider-pink"
+                                    style={{
+                                      background: `linear-gradient(to right, #f472b6 0%, #f472b6 ${(reservationPercentage / (100 - (item.reservedPercentage || 0))) * 100}%, #fce7f3 ${(reservationPercentage / (100 - (item.reservedPercentage || 0))) * 100}%, #fce7f3 100%)`
+                                    }}
+                                  />
+                                  <div className="flex justify-between text-xs text-gray-500 mt-1">
+                                    <span>1%</span>
+                                    <span className="text-pink-600 font-medium">
+                                      {reservationPercentage < 100 ? "💕 Sharing is caring!" : "🎉 Full gift!"}
+                                    </span>
+                                    <span>{100 - (item.reservedPercentage || 0)}%</span>
+                                  </div>
+                                </div>
+
+                                {/* Amount input - smaller and less prominent */}
+                                <div className="flex items-center space-x-2 mt-3 pt-3 border-t border-pink-100">
+                                  <span className="text-xs text-gray-500">Or enter amount:</span>
+                                  <div className="relative flex-1">
+                                    <span className="absolute left-2 top-1/2 transform -translate-y-1/2 text-xs text-gray-400">{getCurrencySymbol()}</span>
+                                    <input
+                                      type="number"
+                                      min="1"
+                                      max={item.price - (item.reservedAmount || 0)}
+                                      value={reservationAmount.toFixed(0)}
+                                      onChange={(e) => {
+                                        const amount = parseFloat(e.target.value) || 0;
+                                        handleAmountChange(amount, item.price);
+                                      }}
+                                      className="w-full pl-8 pr-2 py-1 border border-pink-100 rounded-md focus:ring-1 focus:ring-pink-300 focus:border-transparent text-xs"
+                                    />
+                                  </div>
+                                </div>
                               </div>
-                            </div>
+                            )}
 
-                            {/* Amount input - smaller and less prominent */}
-                            <div className="flex items-center space-x-2 mt-3 pt-3 border-t border-pink-100">
-                              <span className="text-xs text-gray-500">Or enter amount:</span>
-                              <div className="relative flex-1">
-                                <span className="absolute left-2 top-1/2 transform -translate-y-1/2 text-xs text-gray-400">KES</span>
-                                <input
-                                  type="number"
-                                  min="1"
-                                  max={item.price - (item.reservedAmount || 0)}
-                                  value={reservationAmount.toFixed(0)}
-                                  onChange={(e) => {
-                                    const amount = parseFloat(e.target.value) || 0;
-                                    handleAmountChange(amount, item.price);
-                                  }}
-                                  className="w-full pl-8 pr-2 py-1 border border-pink-100 rounded-md focus:ring-1 focus:ring-pink-300 focus:border-transparent text-xs"
-                                />
-                              </div>
+                            <div className="flex space-x-2">
+                              <button
+                                onClick={() => {
+                                  setSelectedItem(null);
+                                  setGuestName('');
+                                  setGuestEmail('');
+                                  setReservationPercentage(100);
+                                  setReservationAmount(0);
+                                }}
+                                className="flex-1 text-gray-600 py-3 rounded-lg font-semibold hover:bg-white transition-colors border border-gray-200"
+                              >
+                                Cancel
+                              </button>
+                              <button
+                                onClick={() => handleReserveItem(item.id)}
+                                disabled={!guestName || reserving || (item.allowPartialReservations && reservationPercentage <= 0)}
+                                className="flex-2 bg-gradient-to-r from-pink-500 to-rose-500 text-white py-3 px-6 rounded-lg font-semibold hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+                              >
+                                {reserving
+                                  ? '💕 Reserving...'
+                                  : item.allowPartialReservations
+                                    ? `🎁 Gift ${reservationPercentage.toFixed(0)}%`
+                                    : '🎁 Gift This to Us'
+                                }
+                              </button>
                             </div>
                           </div>
-                          )}
-
-                          <div className="flex space-x-2">
-                            <button
-                              onClick={() => {
-                                setSelectedItem(null);
-                                setGuestName('');
-                                setGuestEmail('');
+                        ) : (
+                          <button
+                            onClick={() => {
+                              setSelectedItem(item.id);
+                              if (item.allowPartialReservations) {
+                                const remainingPercentage = 100 - (item.reservedPercentage || 0);
+                                setReservationPercentage(remainingPercentage);
+                                setReservationAmount((remainingPercentage * item.price) / 100);
+                              } else {
                                 setReservationPercentage(100);
-                                setReservationAmount(0);
-                              }}
-                              className="flex-1 text-gray-600 py-3 rounded-lg font-semibold hover:bg-white transition-colors border border-gray-200"
-                            >
-                              Cancel
-                            </button>
-                            <button
-                              onClick={() => handleReserveItem(item.id)}
-                              disabled={!guestName || reserving || (item.allowPartialReservations && reservationPercentage <= 0)}
-                              className="flex-2 bg-gradient-to-r from-pink-500 to-rose-500 text-white py-3 px-6 rounded-lg font-semibold hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
-                            >
-                              {reserving
-                                ? '💕 Reserving...'
-                                : item.allowPartialReservations
-                                  ? `🎁 Gift ${reservationPercentage.toFixed(0)}%`
-                                  : '🎁 Gift This to Us'
+                                setReservationAmount(item.price);
                               }
-                            </button>
-                          </div>
-                        </div>
-                      ) : (
-                        <button
-                          onClick={() => {
-                            setSelectedItem(item.id);
-                            if (item.allowPartialReservations) {
-                              const remainingPercentage = 100 - (item.reservedPercentage || 0);
-                              setReservationPercentage(remainingPercentage);
-                              setReservationAmount((remainingPercentage * item.price) / 100);
-                            } else {
-                              setReservationPercentage(100);
-                              setReservationAmount(item.price);
+                            }}
+                            className="w-full bg-gradient-to-r from-pink-500 to-rose-500 text-white py-3 rounded-lg font-semibold hover:shadow-lg transition-all duration-300"
+                          >
+                            {item.allowPartialReservations
+                              ? (item.reservedPercentage > 0 ? '💕 Add Your Love' : '💕 Contribute Any Amount')
+                              : item.quantity > 1
+                                ? `Grab One for Us (${item.quantity - item.reservedCount} left!)`
+                                : 'Claim This for Us 💝'
                             }
-                          }}
-                          className="w-full bg-gradient-to-r from-pink-500 to-rose-500 text-white py-3 rounded-lg font-semibold hover:shadow-lg transition-all duration-300"
-                        >
-                          {item.allowPartialReservations
-                            ? (item.reservedPercentage > 0 ? '💕 Add Your Love' : '💕 Contribute Any Amount')
-                            : item.quantity > 1
-                              ? `Grab One for Us (${item.quantity - item.reservedCount} left!)`
-                              : 'Claim This for Us 💝'
-                          }
-                        </button>
-                      )}
-                    </div>
-                  )}
+                          </button>
+                        )}
+                      </div>
+                    )}
 
                   {item.affiliateLink ? (
                     <a
@@ -689,7 +742,7 @@ const App = () => {
                 <input
                   type="text"
                   value={newItem.name}
-                  onChange={(e) => setNewItem({...newItem, name: e.target.value})}
+                  onChange={(e) => setNewItem({ ...newItem, name: e.target.value })}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
                   required
                 />
@@ -701,7 +754,7 @@ const App = () => {
                   type="number"
                   step="0.01"
                   value={newItem.price}
-                  onChange={(e) => setNewItem({...newItem, price: e.target.value})}
+                  onChange={(e) => setNewItem({ ...newItem, price: e.target.value })}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
                   required
                 />
@@ -712,7 +765,7 @@ const App = () => {
                 <input
                   type="url"
                   value={newItem.image_url}
-                  onChange={(e) => setNewItem({...newItem, image_url: e.target.value})}
+                  onChange={(e) => setNewItem({ ...newItem, image_url: e.target.value })}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
                 />
               </div>
@@ -722,7 +775,7 @@ const App = () => {
                 <input
                   type="url"
                   value={newItem.affiliate_link}
-                  onChange={(e) => setNewItem({...newItem, affiliate_link: e.target.value})}
+                  onChange={(e) => setNewItem({ ...newItem, affiliate_link: e.target.value })}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
                 />
               </div>
@@ -731,7 +784,7 @@ const App = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
                 <select
                   value={newItem.category}
-                  onChange={(e) => setNewItem({...newItem, category: e.target.value})}
+                  onChange={(e) => setNewItem({ ...newItem, category: e.target.value })}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
                 >
                   {categories.map(category => (
@@ -744,7 +797,7 @@ const App = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
                 <textarea
                   value={newItem.description}
-                  onChange={(e) => setNewItem({...newItem, description: e.target.value})}
+                  onChange={(e) => setNewItem({ ...newItem, description: e.target.value })}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
                   rows="3"
                   placeholder="Optional description for the gift"
@@ -757,7 +810,7 @@ const App = () => {
                   type="number"
                   min="1"
                   value={newItem.quantity}
-                  onChange={(e) => setNewItem({...newItem, quantity: e.target.value})}
+                  onChange={(e) => setNewItem({ ...newItem, quantity: e.target.value })}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
                   required
                 />
@@ -771,7 +824,7 @@ const App = () => {
                   <input
                     type="checkbox"
                     checked={newItem.allow_partial_reservations}
-                    onChange={(e) => setNewItem({...newItem, allow_partial_reservations: e.target.checked})}
+                    onChange={(e) => setNewItem({ ...newItem, allow_partial_reservations: e.target.checked })}
                     className="w-4 h-4 text-pink-600 bg-gray-100 border-gray-300 rounded focus:ring-pink-500 focus:ring-2"
                   />
                   <span className="text-sm font-medium text-gray-700">
@@ -819,7 +872,7 @@ const App = () => {
             Your love and support mean the world to us. We can't wait to celebrate with you - and maybe even use that fancy kitchen gear! 🥂
           </p>
           <div className="flex items-center justify-center space-x-6 text-sm text-gray-500">
-            <span style={{fontFamily: 'Great Vibes', fontSize: '1.2rem'}}>Lærke & Micheal</span>
+            <span style={{ fontFamily: 'Great Vibes', fontSize: '1.2rem' }}>Lærke & Micheal</span>
             <span>•</span>
             <span>February 14, 2026</span>
             <span>•</span>
@@ -828,7 +881,7 @@ const App = () => {
             <a
               href="/admin.html"
               className="text-pink-600 hover:text-pink-700 font-medium transition-colors"
-              style={{fontFamily: 'Great Vibes', fontSize: '1.1rem'}}
+              style={{ fontFamily: 'Great Vibes', fontSize: '1.1rem' }}
             >
               💕 For the Lovebirds
             </a>

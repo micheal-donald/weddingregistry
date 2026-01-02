@@ -260,7 +260,6 @@ const App = () => {
             </h2>
             <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
               Help us start our new life together with gifts that will make our house a home.
-              <br /> We are not deadset on the brands of the gifts - they do not have to be from the exact link, but whichever types you can find in Denmark/Kenya/wherever you are!
             </p>
 
             <div className="flex flex-wrap justify-center items-center gap-8 text-gray-700 mb-12">
