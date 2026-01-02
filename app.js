@@ -360,13 +360,23 @@ const App = () => {
             {/* Currency Toggle */}
             <motion.button
               onClick={toggleCurrency}
-              className="bg-white/90 backdrop-blur-sm border-2 border-pink-200 px-4 py-2 rounded-full font-semibold hover:shadow-lg transition-all duration-300 flex items-center space-x-2 hover:border-pink-300"
+              className="bg-white/90 backdrop-blur-sm border-2 border-pink-200 px-4 py-2 rounded-full font-semibold hover:shadow-lg transition-all duration-300 flex items-center space-x-2 hover:border-pink-300 group"
               title={`Switch to ${currency === 'KES' ? 'Danish Krone' : 'Kenyan Shilling'}`}
             >
-              <span className="text-lg emoji-flag">{currency === 'KES' ? '🇰🇪' : '🇩🇰'}</span>
-              <span className="text-sm font-bold text-gray-700">{currency}</span>
-              <span className="text-xs text-gray-500">→</span>
-              <span className="text-lg opacity-50 emoji-flag">{currency === 'KES' ? '🇩🇰' : '🇰🇪'}</span>
+              <div className="flex items-center space-x-2">
+                <img
+                  src={currency === 'KES' ? "https://flagcdn.com/w40/ke.png" : "https://flagcdn.com/w40/dk.png"}
+                  alt={currency}
+                  className="w-6 h-4 object-cover rounded-sm shadow-sm"
+                />
+                <span className="text-sm font-bold text-gray-700">{currency}</span>
+              </div>
+              <span className="text-xs text-gray-400 group-hover:text-pink-400 transition-colors">→</span>
+              <img
+                src={currency === 'KES' ? "https://flagcdn.com/w40/dk.png" : "https://flagcdn.com/w40/ke.png"}
+                alt="Switch"
+                className="w-5 h-3.5 object-cover rounded-sm opacity-40 group-hover:opacity-60 transition-opacity"
+              />
             </motion.button>
 
             {isAdmin && (
