@@ -363,10 +363,10 @@ const App = () => {
               className="bg-white/90 backdrop-blur-sm border-2 border-pink-200 px-4 py-2 rounded-full font-semibold hover:shadow-lg transition-all duration-300 flex items-center space-x-2 hover:border-pink-300"
               title={`Switch to ${currency === 'KES' ? 'Danish Krone' : 'Kenyan Shilling'}`}
             >
-              <span className="text-lg">{currency === 'KES' ? '🇰🇪' : '🇩🇰'}</span>
+              <span className="text-lg emoji-flag">{currency === 'KES' ? '🇰🇪' : '🇩🇰'}</span>
               <span className="text-sm font-bold text-gray-700">{currency}</span>
               <span className="text-xs text-gray-500">→</span>
-              <span className="text-lg opacity-50">{currency === 'KES' ? '🇩🇰' : '🇰🇪'}</span>
+              <span className="text-lg opacity-50 emoji-flag">{currency === 'KES' ? '🇩🇰' : '🇰🇪'}</span>
             </motion.button>
 
             {isAdmin && (
