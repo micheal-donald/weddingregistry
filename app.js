@@ -48,6 +48,33 @@ const App = () => {
     return `KES ${price.toLocaleString()}`;
   };
 
+  const formatGuestName = (name) => {
+    if (!name) return 'Someone special';
+    const trimmed = name.trim();
+    if (!trimmed) return 'Someone special';
+
+    // Use hash to pick a stable emoji for the same name
+    let hash = 0;
+    for (let i = 0; i < trimmed.length; i++) {
+      hash = ((hash << 5) - hash) + trimmed.charCodeAt(i);
+      hash |= 0;
+    }
+    hash = Math.abs(hash);
+
+    const firstLetter = trimmed.charAt(0).toUpperCase();
+
+    const emojis = [
+      '✨', '🌸', '🦋', '💝', '🌟', '🕊️', '🌿', '🎀', '🌈', '🍓',
+      '🍀', '💎', '🌙', '☀️', '🌻', '🍃', '🥂', '💍', '🧸', '🍭',
+      '🧁', '🍪', '🍩', '🍫', '🍯', '🥞', '🎈', '🎨', '🧩', '🚀',
+      '🐱', '🐶', '🦊', '🐼', '🐨', '🐝', '🐧', '🦉', '🦄'
+    ];
+
+    const emoji = emojis[hash % emojis.length];
+
+    return `${firstLetter}. ${emoji}`;
+  };
+
   const getCurrencySymbol = (curr = currency) => {
     return curr === 'DKK' ? 'kr' : 'KES';
   };
@@ -494,7 +521,7 @@ const App = () => {
                                 key={idx}
                                 className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-green-50 text-green-700"
                               >
-                                ✅ {res.guest_name}
+                                ✅ {formatGuestName(res.guest_name)}
                               </span>
                             ))}
                           </div>
@@ -518,7 +545,7 @@ const App = () => {
                         <span className="text-green-600">✅</span>
                         <span className="text-sm text-gray-600">Reserved by:</span>
                         <span className="font-semibold text-gray-800">
-                          {item.reservations[0]?.guest_name || 'Someone special'}
+                          {formatGuestName(item.reservations[0]?.guest_name)}
                         </span>
                       </div>
                       {isAdmin && (
@@ -560,7 +587,7 @@ const App = () => {
                                 key={idx}
                                 className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-pink-50 text-pink-700"
                               >
-                                ❤️ {res.guest_name}
+                                ❤️ {formatGuestName(res.guest_name)}
                               </span>
                             ))}
                           </div>
