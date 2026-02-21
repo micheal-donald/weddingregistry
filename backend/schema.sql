@@ -1,8 +1,86 @@
--- Wedding Registry Database Schema
+-- Wedding Registry SaaS — Multi-Tenant Database Schema
+-- This is the canonical schema for fresh installations.
+-- For migrating an existing single-tenant deployment, use the scripts in migrations/.
 
--- Gifts table
+-- ============================================================
+-- REGISTRIES: Central tenant table
+-- ============================================================
+CREATE TABLE registries (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    slug VARCHAR(80) UNIQUE NOT NULL,
+
+    -- Couple info
+    partner1_name VARCHAR(100) NOT NULL,
+    partner2_name VARCHAR(100) NOT NULL,
+    couple_display_name VARCHAR(200),
+
+    -- Event details
+    event_date DATE,
+    event_location VARCHAR(200),
+    event_venue VARCHAR(200),
+
+    -- Customization
+    hero_heading VARCHAR(200) DEFAULT 'Our Wedding Registry',
+    hero_subheading TEXT DEFAULT 'Help us fill our first home with love',
+    thank_you_message TEXT DEFAULT 'Your love and support mean the world to us.',
+
+    -- Currency
+    primary_currency VARCHAR(3) NOT NULL DEFAULT 'USD',
+    secondary_currency VARCHAR(3),
+    exchange_rate DECIMAL(12, 6),
+
+    -- Theme
+    theme_primary_color VARCHAR(7) DEFAULT '#ec4899',
+    theme_secondary_color VARCHAR(7) DEFAULT '#f43f5e',
+    theme_font_family VARCHAR(100) DEFAULT 'Great Vibes',
+
+    -- Categories
+    categories JSONB DEFAULT '["Kitchen","Electronics","Home","Bedroom","Bathroom","Other"]'::jsonb,
+
+    -- Settings
+    is_published BOOLEAN DEFAULT FALSE,
+    show_price_to_guests BOOLEAN DEFAULT TRUE,
+    plan_id VARCHAR(20) DEFAULT 'free',
+
+    -- Metadata
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_registries_slug ON registries(slug);
+
+-- ============================================================
+-- USERS: Multi-user authentication
+-- ============================================================
+CREATE TABLE users (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    display_name VARCHAR(100),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ============================================================
+-- REGISTRY_MEMBERS: Links users to registries (many-to-many)
+-- ============================================================
+CREATE TABLE registry_members (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    registry_id UUID NOT NULL REFERENCES registries(id) ON DELETE CASCADE,
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    role VARCHAR(20) NOT NULL DEFAULT 'owner',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(registry_id, user_id)
+);
+
+CREATE INDEX idx_registry_members_user ON registry_members(user_id);
+CREATE INDEX idx_registry_members_registry ON registry_members(registry_id);
+
+-- ============================================================
+-- GIFTS: Registry items
+-- ============================================================
 CREATE TABLE gifts (
     id SERIAL PRIMARY KEY,
+    registry_id UUID NOT NULL REFERENCES registries(id) ON DELETE CASCADE,
     name TEXT NOT NULL,
     price DECIMAL(10, 2) NOT NULL,
     image_url TEXT,
@@ -16,16 +94,25 @@ CREATE TABLE gifts (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Guests table
+CREATE INDEX idx_gifts_registry ON gifts(registry_id);
+
+-- ============================================================
+-- GUESTS: People who reserve gifts
+-- ============================================================
 CREATE TABLE guests (
     id SERIAL PRIMARY KEY,
+    registry_id UUID NOT NULL REFERENCES registries(id) ON DELETE CASCADE,
     name TEXT NOT NULL,
     email TEXT,
     phone TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Partial Reservations table (replaces simple reservations and supports both full and partial)
+CREATE INDEX idx_guests_registry ON guests(registry_id);
+
+-- ============================================================
+-- PARTIAL_RESERVATIONS: Supports full, partial, and quantity-based reservations
+-- ============================================================
 CREATE TABLE partial_reservations (
     id SERIAL PRIMARY KEY,
     gift_id INTEGER NOT NULL REFERENCES gifts(id) ON DELETE CASCADE,
@@ -36,44 +123,15 @@ CREATE TABLE partial_reservations (
     notes TEXT
 );
 
--- Old reservations table is deprecated/replaced by partial_reservations logic, but keeping structure if needed for reference, 
--- or we just use partial_reservations for everything as per the backend code analysis.
--- The backend code uses 'partial_reservations' table in the GET /api/gifts query, so we MUST define it.
--- The SQLite schema in the file I read earlier had 'reservations', but 'server.js' logic used 'partial_reservations'.
--- Wait, I need to check server.js again. server.js lines 52 and 188 reference 'partial_reservations'.
--- But the initial schema.sql file I read (step 23) ONLY had 'reservations' table. 
--- This implies the schema.sql file was OUTDATED compared to the code, or I missed something.
--- Let's look at server.js again. Line 52: "LEFT JOIN partial_reservations pr".
--- The previous schema.sql content (Step 23) did NOT have partial_reservations table. 
--- It seems the user might have run migration scripts (like add-partial-flag.sql etc visible in file list) on their local DB but not updated schema.sql.
--- I should consolidate the schema to match the current CODE expectations.
+CREATE INDEX idx_partial_reservations_gift ON partial_reservations(gift_id);
 
--- Admins table (for couple authentication)
+-- ============================================================
+-- LEGACY: Admins table (kept for backward compatibility during migration)
+-- New installations should use the users + registry_members tables instead.
+-- ============================================================
 CREATE TABLE admins (
     id SERIAL PRIMARY KEY,
     username TEXT UNIQUE NOT NULL,
     password_hash TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-
--- Insert initial gifts data
-INSERT INTO gifts (name, price, image_url, affiliate_link, category, description) VALUES
-('Money', 0, 'https://placehold.co/300x300/f8f9fa/6c757d?text=💰', '', 'Other', 'Cash gift - any amount appreciated'),
-('Harman Kardon Onyx Studio 9 Bluetooth Speaker', 49995, 'https://hotpoint.co.ke/media/cache/ca/9d/ca9d7df71e85f21a091f5a1919bc64f7.webp', 'https://hotpoint.co.ke/catalogue/harman-kordon-onyx-studio-9-port-stereo-bluetooth-speaker-50w-black_5725/', 'Audio', '50W Bluetooth speaker with premium sound quality'),
-('Grill', 25000, 'https://placehold.co/300x300/f8f9fa/6c757d?text=🔥+Grill', '', 'Appliances', 'Outdoor grilling for our future BBQ parties'),
-('DeLonghi Coffee Grinder KG200', 18000, 'https://placehold.co/300x300/f8f9fa/6c757d?text=Coffee+Grinder', 'https://hotpoint.co.ke/catalogue/delonghi-kg200-coffee-grinder_4819/', 'Kitchen', 'Fresh ground coffee every morning'),
-('DeLonghi Coffee Maker EC230BK', 24995, 'https://hotpoint.co.ke/media/products/2023/11/cxvbvcbv.jpg', 'https://hotpoint.co.ke/catalogue/delonghi-ec230bk-coffee-maker_4775/', 'Kitchen', 'Perfect espresso at home'),
-('VR Headset', 35000, 'https://placehold.co/300x300/f8f9fa/6c757d?text=VR+Headset', '', 'Electronics', 'Virtual reality adventures together'),
-('Vinyl Player', 15000, 'https://placehold.co/300x300/f8f9fa/6c757d?text=🎵+Vinyl+Player', '', 'Audio', 'Vintage music experience'),
-('Vinyl Records Collection', 5000, 'https://placehold.co/300x300/f8f9fa/6c757d?text=🎶+Vinyls', '', 'Audio', 'Classic albums to start our collection'),
-('Prestige Cast Iron Pots & Pans Set', 12000, 'https://placehold.co/300x300/f8f9fa/6c757d?text=Cast+Iron+Set', 'https://myredrhino.com/product-category/prestige-kitchen-products-online-store-kenya/cast-iron/', 'Kitchen', 'Durable cookware for our kitchen'),
-('Indoor Plants Collection', 3000, 'https://placehold.co/300x300/f8f9fa/6c757d?text=🌿+Plants', '', 'Home', 'Green life for our new home'),
-('Black+Decker Robot Vacuum & Mop', 54995, 'https://hotpoint.co.ke/media/cache/18/b3/18b399aaf6508b767536d0c285f79642.webp', 'https://hotpoint.co.ke/catalogue/blackdecker-brva425b10-b5-robotic-vacuum-cleaner-and-mop-2-in-1-white_5562/', 'Appliances', 'Automated cleaning for busy days'),
-('Wood Chopping Boards Set', 4000, 'https://placehold.co/300x300/f8f9fa/6c757d?text=🪵+Cutting+Board', '', 'Kitchen', 'Premium wooden cutting boards'),
-('MT900 Ultralight 3-Person Trekking Tent', 25000, 'https://placehold.co/300x300/f8f9fa/6c757d?text=⛺+Tent', 'https://www.decathlon.co.ke/trekking-tents/323513-43041-tunnel-trekking-tent-3-person-mt900-ultralight.html', 'Outdoor', 'Adventure trips in Kenya and beyond'),
-('Trekking & Camping Gear Set', 20000, 'https://placehold.co/300x300/f8f9fa/6c757d?text=🎒+Camping+Gear', '', 'Outdoor', 'Complete camping setup for outdoor adventures');
-
--- Create default admin account (username: admin, password: wedding2026)
--- Password hash for 'wedding2026' using bcrypt
-INSERT INTO admins (username, password_hash) VALUES
-('admin', '$2b$10$rQ.Q8WQ8WQ8WQ8WQ8WQ8WOHvGvGvGvGvGvGvGvGvGvGvGvGvGvGv');

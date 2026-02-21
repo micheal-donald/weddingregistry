@@ -1,50 +1,49 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance for AI assistants working with the Wedding Registry repository.
 
 ## Project Overview
 
-This is a wedding registry application built as a single React component. The application allows couples to:
-- Display wedding registry items with categories, pricing, and affiliate links
-- Allow guests to reserve items by entering their name
-- Manage the registry through add/edit/delete functionality with a modal interface
-- Show reservation status and statistics
+A full-stack wedding registry application for Lærke & Micheal's wedding.
+- **Frontend**: React-based single page application.
+- **Backend**: Express.js API (supports Vercel serverless and local Node.js).
+- **Database**: PostgreSQL (Supabase) for production, SQLite for development.
+
+## Core Features
+- **Gift Management**: Add/Edit/Delete gifts with categories, prices, and affiliate links.
+- **Reservations**:
+  - Full reservations (Claim a whole gift).
+  - Partial reservations (Contribute a percentage/amount towards a gift).
+  - Quantity-based reservations (Claim 1 of N items).
+- **Privacy**: Guest names are obfuscated in the public UI (e.g., "L. ✨").
+- **Currency**: Supports KES (Kenyan Shilling) and DKK (Danish Krone) with instant toggle.
+- **Admin Dashboard**: Protected management interface with JWT authentication.
 
 ## Architecture
 
-The application is contained in a single file (`app.js`) that exports a React functional component with the following key features:
-
-### State Management
-- Uses React hooks (`useState`) for all state management
-- Main state includes:
-  - `items`: Array of registry items with properties (id, name, price, image, affiliateLink, reserved, reservedBy, category)
-  - `showAddForm`/`editingItem`: Modal state for item management
-  - `newItem`: Form data for adding/editing items
-  - `guestName`/`selectedItem`: Guest reservation flow state
-
-### Component Structure
-- Single-page application with header, hero section, registry grid, and footer
-- Modal overlay for add/edit item functionality
-- Responsive grid layout for registry items
-- Uses Framer Motion for animations
-
-### Key Functionality
-- CRUD operations for registry items (handleAddItem, handleEditItem, handleUpdateItem, handleDeleteItem)
-- Guest reservation system (handleReserveItem, handleUnreserveItem)
-- Category-based organization with predefined categories: Kitchen, Cookware, Home, Bedroom, Bathroom, Electronics, Other
+- `index.html`: Entry point, loads React/Tailwind/Framer Motion via CDN.
+- `app.js`: Main React component containing all frontend logic and state.
+- `api/index.js`: Main Express API entry point for Vercel deployment.
+- `backend/`:
+  - `server.js`: Local Express server.
+  - `schema.sql`: Database schema definition.
+  - `init-db.js`: Database initialization script.
+  - `database/`: Local SQLite database storage.
 
 ## Technology Stack
 
-- **React**: Functional components with hooks
-- **Lucide React**: Icon library (Heart, Gift, Users, Calendar, MapPin, Check, Plus, Edit, Trash2, ExternalLink)
-- **Framer Motion**: Animation library for smooth transitions
-- **Tailwind CSS**: Utility-first CSS framework for styling
-- **No build system**: Single file application without package.json or build configuration
+- **Frontend**: React (Hooks), Tailwind CSS, Framer Motion, Lucide React.
+- **Backend**: Node.js, Express.js, JWT, Bcrypt.
+- **Database**: `pg` (PostgreSQL/Supabase), `sqlite3` (Local).
+- **Deployment**: Vercel (Frontend & Serverless API).
 
-## Development Notes
+## Development Commands
 
-- The application uses inline hardcoded sample data for initial registry items
-- Uses placeholder images from placehold.co for demonstration
-- No backend integration - all data is stored in component state
-- No persistence - data resets on page reload
-- Uses modern React patterns (functional components, hooks)
+- **Local Server**: `node backend/server.js` (runs on port 3001).
+- **Init DB**: `node backend/init-db.js`
+- **Frontend**: Open `index.html` in a browser or serve via static server.
+
+## Design Philosophy
+
+- **Modern & Premium**: Uses a soft color palette (pink/rose/purple), glassmorphism, and smooth animations.
+- **User-Centric**: Clear call-to-actions, mobile-responsive grid, and intuitive reservation flows.
