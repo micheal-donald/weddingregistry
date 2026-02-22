@@ -1,6 +1,7 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
+import { ToastProvider } from './components/Toast';
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
@@ -12,15 +13,17 @@ import AdminDashboardPage from './pages/AdminDashboardPage';
 function App() {
   return (
     <AuthProvider>
-      <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-        <Route path="/dashboard" element={<DashboardPage />} />
-        <Route path="/new" element={<OnboardingPage />} />
-        <Route path="/:slug" element={<RegistryPage />} />
-        <Route path="/:slug/admin" element={<AdminDashboardPage />} />
-      </Routes>
+      <ToastProvider>
+        <Routes>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/new" element={<OnboardingPage />} />
+          <Route path="/:slug" element={<RegistryPage />} />
+          <Route path="/:slug/admin" element={<AdminDashboardPage />} />
+        </Routes>
+      </ToastProvider>
     </AuthProvider>
   );
 }

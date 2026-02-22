@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { RegistryProvider, useRegistry } from '../contexts/RegistryContext';
 import { useGifts } from '../hooks/useGifts';
 import { useAuth } from '../contexts/AuthContext';
+import { useToast } from '../components/Toast';
 import { Search } from 'lucide-react';
 import Header from '../components/Header';
 import HeroSection from '../components/HeroSection';
@@ -14,6 +15,7 @@ function RegistryContent() {
   const { slug, registry, loading: configLoading, error: configError } = useRegistry();
   const { items, loading: giftsLoading, error: giftsError, refetch } = useGifts(slug);
   const { isAuthenticated } = useAuth();
+  const { addToast } = useToast();
 
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
@@ -67,34 +69,59 @@ function RegistryContent() {
   }
 
   const handleReserve = async (giftId, data) => {
-    const result = await api.reserveGift(slug, giftId, data);
-    await refetch();
-    return result;
+    try {
+      const result = await api.reserveGift(slug, giftId, data);
+      await refetch();
+      addToast('Gift reserved! Thank you for your generosity.');
+      return result;
+    } catch (err) {
+      addToast(err.message || 'Failed to reserve gift', 'error');
+    }
   };
 
   const handleUnreserve = async (giftId) => {
     if (!confirm('Are you sure you want to unreserve this gift?')) return;
-    await api.unreserveGift(slug, giftId);
-    await refetch();
+    try {
+      await api.unreserveGift(slug, giftId);
+      await refetch();
+      addToast('Reservation cleared.');
+    } catch (err) {
+      addToast(err.message || 'Failed to unreserve', 'error');
+    }
   };
 
   const handleAddGift = async (data) => {
-    await api.addGift(slug, data);
-    await refetch();
-    setShowAddForm(false);
+    try {
+      await api.addGift(slug, data);
+      await refetch();
+      setShowAddForm(false);
+      addToast('Gift added to registry!');
+    } catch (err) {
+      addToast(err.message || 'Failed to add gift', 'error');
+    }
   };
 
   const handleUpdateGift = async (data) => {
     if (!editingItem) return;
-    await api.updateGift(slug, editingItem.id, data);
-    await refetch();
-    setEditingItem(null);
+    try {
+      await api.updateGift(slug, editingItem.id, data);
+      await refetch();
+      setEditingItem(null);
+      addToast('Gift updated.');
+    } catch (err) {
+      addToast(err.message || 'Failed to update gift', 'error');
+    }
   };
 
   const handleDeleteGift = async (giftId) => {
     if (!confirm('Are you sure you want to delete this gift?')) return;
-    await api.deleteGift(slug, giftId);
-    await refetch();
+    try {
+      await api.deleteGift(slug, giftId);
+      await refetch();
+      addToast('Gift removed from registry.');
+    } catch (err) {
+      addToast(err.message || 'Failed to delete gift', 'error');
+    }
   };
 
   const reservedCount = items.filter(item => item.reserved).length;
