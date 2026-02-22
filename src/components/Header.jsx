@@ -2,9 +2,10 @@ import { Heart, Plus } from 'lucide-react';
 import { useRegistry } from '../contexts/RegistryContext';
 import { useAuth } from '../contexts/AuthContext';
 import CurrencyToggle from './CurrencyToggle';
+import ShareButton from './ShareButton';
 
 export default function Header({ onAddGift }) {
-  const { coupleNames } = useRegistry();
+  const { coupleNames, slug } = useRegistry();
   const { isAuthenticated } = useAuth();
 
   return (
@@ -25,6 +26,7 @@ export default function Header({ onAddGift }) {
 
           <div className="flex items-center space-x-3">
             <CurrencyToggle />
+            <ShareButton slug={slug} />
 
             {isAuthenticated && onAddGift && (
               <button

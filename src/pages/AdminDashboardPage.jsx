@@ -4,6 +4,7 @@ import { RegistryProvider, useRegistry } from '../contexts/RegistryContext';
 import { useAuth } from '../contexts/AuthContext';
 import { getReservations } from '../utils/api';
 import { Heart, ExternalLink, Settings } from 'lucide-react';
+import ShareButton from '../components/ShareButton';
 
 function AdminContent() {
   const { registry, coupleNames, slug, loading: configLoading } = useRegistry();
@@ -63,6 +64,7 @@ function AdminContent() {
               <ExternalLink className="w-3.5 h-3.5" />
               View Registry
             </Link>
+            <ShareButton slug={slug} />
             <Link to="/dashboard"
               className="text-dark/50 hover:text-dark text-sm font-medium transition-colors">
               My Registries
