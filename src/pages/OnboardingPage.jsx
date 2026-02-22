@@ -1,8 +1,7 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { createRegistry } from '../utils/api';
-import { Heart } from 'lucide-react';
 
 const CURRENCY_OPTIONS = ['USD', 'EUR', 'GBP', 'KES', 'DKK', 'NGN', 'JPY', 'BRL', 'INR', 'AUD', 'CAD'];
 
@@ -49,7 +48,7 @@ export default function OnboardingPage() {
         secondaryCurrency: form.secondaryCurrency || null,
       });
 
-      navigate(`/${result.registry.slug}`);
+      navigate(`/${result.registry.slug}/admin`);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -58,92 +57,93 @@ export default function OnboardingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-rose-50 to-purple-50 flex items-center justify-center">
-      <div className="bg-white rounded-2xl shadow-lg p-8 max-w-lg w-full mx-4">
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-gradient-to-br from-pink-500 to-rose-500 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Heart className="w-8 h-8 text-white" />
-          </div>
-          <h1 className="text-2xl font-bold text-gray-800 mb-2">Create Your Registry</h1>
-          <p className="text-gray-600">Step {step} of 2</p>
+    <div className="min-h-screen bg-background flex items-center justify-center px-4">
+      <div className="w-full max-w-lg">
+        <div className="text-center mb-10">
+          <Link to="/" className="font-serif italic text-4xl font-bold text-primary">Gifted</Link>
+          <p className="text-dark/60 mt-3 font-sans">Step {step} of 2</p>
         </div>
 
-        {step === 1 && (
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Partner 1 Name</label>
-              <input type="text" value={form.partner1Name} onChange={(e) => update('partner1Name', e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
-                placeholder="First name" required />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Partner 2 Name</label>
-              <input type="text" value={form.partner2Name} onChange={(e) => update('partner2Name', e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
-                placeholder="First name" required />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Wedding Date (optional)</label>
-              <input type="date" value={form.eventDate} onChange={(e) => update('eventDate', e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent" />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Location (optional)</label>
-              <input type="text" value={form.eventLocation} onChange={(e) => update('eventLocation', e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
-                placeholder="City, Country" />
-            </div>
+        <div className="bg-white rounded-[2rem] shadow-lg p-8 border border-dark/5">
+          {step === 1 && (
+            <div className="space-y-5">
+              <h2 className="text-xl font-bold text-dark mb-1">Tell us about you two</h2>
+              <div>
+                <label className="block text-sm font-medium text-dark/70 mb-2">Partner 1 Name</label>
+                <input type="text" value={form.partner1Name} onChange={(e) => update('partner1Name', e.target.value)}
+                  className="w-full px-4 py-3 border border-dark/10 rounded-xl focus:ring-2 focus:ring-primary/30 focus:border-primary bg-background/50 transition-colors"
+                  placeholder="First name" required />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-dark/70 mb-2">Partner 2 Name</label>
+                <input type="text" value={form.partner2Name} onChange={(e) => update('partner2Name', e.target.value)}
+                  className="w-full px-4 py-3 border border-dark/10 rounded-xl focus:ring-2 focus:ring-primary/30 focus:border-primary bg-background/50 transition-colors"
+                  placeholder="First name" required />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-dark/70 mb-2">Wedding Date (optional)</label>
+                <input type="date" value={form.eventDate} onChange={(e) => update('eventDate', e.target.value)}
+                  className="w-full px-4 py-3 border border-dark/10 rounded-xl focus:ring-2 focus:ring-primary/30 focus:border-primary bg-background/50 transition-colors" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-dark/70 mb-2">Location (optional)</label>
+                <input type="text" value={form.eventLocation} onChange={(e) => update('eventLocation', e.target.value)}
+                  className="w-full px-4 py-3 border border-dark/10 rounded-xl focus:ring-2 focus:ring-primary/30 focus:border-primary bg-background/50 transition-colors"
+                  placeholder="City, Country" />
+              </div>
 
-            {slug && (
-              <p className="text-sm text-gray-500">
-                Your registry URL: <span className="font-mono text-pink-600">/{slug}</span>
-              </p>
-            )}
+              {slug && (
+                <p className="text-sm text-dark/50">
+                  Your registry URL: <span className="font-mono text-primary font-semibold">/{slug}</span>
+                </p>
+              )}
 
-            <button
-              onClick={() => setStep(2)}
-              disabled={!form.partner1Name || !form.partner2Name}
-              className="w-full bg-gradient-to-r from-pink-500 to-rose-500 text-white py-3 rounded-lg font-semibold hover:shadow-lg transition-all duration-300 disabled:opacity-50 mt-4">
-              Next
-            </button>
-          </div>
-        )}
-
-        {step === 2 && (
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Primary Currency</label>
-              <select value={form.primaryCurrency} onChange={(e) => update('primaryCurrency', e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent">
-                {CURRENCY_OPTIONS.map(c => <option key={c} value={c}>{c}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Secondary Currency (optional)</label>
-              <select value={form.secondaryCurrency} onChange={(e) => update('secondaryCurrency', e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent">
-                <option value="">None</option>
-                {CURRENCY_OPTIONS.filter(c => c !== form.primaryCurrency).map(c => <option key={c} value={c}>{c}</option>)}
-              </select>
-              <p className="text-xs text-gray-500 mt-1">For international couples — guests can toggle between currencies</p>
-            </div>
-
-            {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">{error}</div>
-            )}
-
-            <div className="flex space-x-4 pt-4">
-              <button onClick={() => setStep(1)}
-                className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-colors">
-                Back
-              </button>
-              <button onClick={handleSubmit} disabled={loading}
-                className="flex-1 px-6 py-3 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-lg font-semibold hover:shadow-lg transition-all duration-300 disabled:opacity-50">
-                {loading ? 'Creating...' : 'Create Registry'}
+              <button
+                onClick={() => setStep(2)}
+                disabled={!form.partner1Name || !form.partner2Name}
+                className="w-full bg-primary text-background py-3.5 rounded-full font-semibold hover:shadow-lg magnetic-transform hover:scale-[1.02] transition-all disabled:opacity-50 mt-2">
+                Next
               </button>
             </div>
-          </div>
-        )}
+          )}
+
+          {step === 2 && (
+            <div className="space-y-5">
+              <h2 className="text-xl font-bold text-dark mb-1">Choose your currencies</h2>
+              <div>
+                <label className="block text-sm font-medium text-dark/70 mb-2">Primary Currency</label>
+                <select value={form.primaryCurrency} onChange={(e) => update('primaryCurrency', e.target.value)}
+                  className="w-full px-4 py-3 border border-dark/10 rounded-xl focus:ring-2 focus:ring-primary/30 focus:border-primary bg-background/50 transition-colors">
+                  {CURRENCY_OPTIONS.map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-dark/70 mb-2">Secondary Currency (optional)</label>
+                <select value={form.secondaryCurrency} onChange={(e) => update('secondaryCurrency', e.target.value)}
+                  className="w-full px-4 py-3 border border-dark/10 rounded-xl focus:ring-2 focus:ring-primary/30 focus:border-primary bg-background/50 transition-colors">
+                  <option value="">None</option>
+                  {CURRENCY_OPTIONS.filter(c => c !== form.primaryCurrency).map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
+                <p className="text-xs text-dark/40 mt-1.5">For international couples — guests can toggle between currencies</p>
+              </div>
+
+              {error && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">{error}</div>
+              )}
+
+              <div className="flex gap-3 pt-2">
+                <button onClick={() => setStep(1)}
+                  className="flex-1 px-6 py-3.5 border border-dark/10 text-dark/70 rounded-full font-semibold hover:bg-dark/5 transition-colors">
+                  Back
+                </button>
+                <button onClick={handleSubmit} disabled={loading}
+                  className="flex-1 px-6 py-3.5 bg-primary text-background rounded-full font-semibold hover:shadow-lg magnetic-transform hover:scale-[1.02] transition-all disabled:opacity-50">
+                  {loading ? 'Creating...' : 'Create Registry'}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

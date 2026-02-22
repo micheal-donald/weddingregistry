@@ -7,7 +7,6 @@ import Header from '../components/Header';
 import HeroSection from '../components/HeroSection';
 import GiftCard from '../components/GiftCard';
 import AddEditGiftModal from '../components/AddEditGiftModal';
-import Footer from '../components/Footer';
 import * as api from '../utils/api';
 
 function RegistryContent() {
@@ -23,10 +22,10 @@ function RegistryContent() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-rose-50 to-purple-50 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <div className="text-4xl mb-4">💍</div>
-          <div className="text-xl text-gray-600">Gathering our wishes...</div>
+          <div className="text-dark/50 font-sans">Gathering our wishes...</div>
         </div>
       </div>
     );
@@ -34,12 +33,12 @@ function RegistryContent() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-rose-50 to-purple-50 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <div className="text-4xl mb-4">⚠️</div>
           <div className="text-xl text-red-600 mb-4">Error loading registry</div>
-          <div className="text-gray-600 mb-4">{error}</div>
-          <button onClick={refetch} className="bg-[var(--color-primary)] text-white px-6 py-2 rounded-lg hover:opacity-90">
+          <div className="text-dark/50 mb-4">{error}</div>
+          <button onClick={refetch} className="bg-primary text-background px-6 py-2.5 rounded-full font-semibold hover:shadow-lg transition-all">
             Try Again
           </button>
         </div>
@@ -50,12 +49,6 @@ function RegistryContent() {
   const handleReserve = async (giftId, data) => {
     const result = await api.reserveGift(slug, giftId, data);
     await refetch();
-
-    const isPartial = data.percentage && data.percentage < 100;
-    alert(isPartial
-      ? `You're a star! Your ${data.percentage.toFixed(0)}% means the world to us 💕`
-      : "You're amazing! Thank you from our hearts 💕✨"
-    );
     return result;
   };
 
@@ -87,24 +80,32 @@ function RegistryContent() {
   const reservedCount = items.filter(item => item.reserved).length;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-rose-50 to-purple-50">
+    <div className="min-h-screen bg-background">
       <Header onAddGift={isAuthenticated ? () => setShowAddForm(true) : null} />
       <HeroSection totalItems={items.length} reservedItems={reservedCount} />
 
       <section className="py-12 px-4">
         <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {items.map((item) => (
-              <GiftCard
-                key={item.id}
-                item={item}
-                onReserve={handleReserve}
-                onUnreserve={isAuthenticated ? handleUnreserve : null}
-                onEdit={isAuthenticated ? setEditingItem : null}
-                onDelete={isAuthenticated ? handleDeleteGift : null}
-              />
-            ))}
-          </div>
+          {items.length === 0 ? (
+            <div className="text-center py-16">
+              <div className="text-5xl mb-4">🎁</div>
+              <h3 className="text-xl font-bold text-dark mb-2">No gifts yet</h3>
+              <p className="text-dark/50">This registry is still being set up. Check back soon!</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {items.map((item) => (
+                <GiftCard
+                  key={item.id}
+                  item={item}
+                  onReserve={handleReserve}
+                  onUnreserve={isAuthenticated ? handleUnreserve : null}
+                  onEdit={isAuthenticated ? setEditingItem : null}
+                  onDelete={isAuthenticated ? handleDeleteGift : null}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
@@ -115,8 +116,6 @@ function RegistryContent() {
           onClose={() => { setShowAddForm(false); setEditingItem(null); }}
         />
       )}
-
-      <Footer />
     </div>
   );
 }

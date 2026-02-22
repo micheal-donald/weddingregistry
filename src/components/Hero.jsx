@@ -8,10 +8,10 @@ export default function Hero() {
     const [activeIndex, setActiveIndex] = useState(0);
 
     const images = [
-        "https://images.unsplash.com/photo-1542458428-569bda29cbea?q=80&w=2938&auto=format&fit=crop", // Diverse elegant
-        "https://images.unsplash.com/photo-1519225421980-715cb0215aed?q=80&w=2940&auto=format&fit=crop", // Warm minimal
-        "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?q=80&w=2938&auto=format&fit=crop", // Hands/rings
-        "https://images.unsplash.com/photo-1469334031218-e382a71b716b?q=80&w=2940&auto=format&fit=crop"  // Outdoor modern
+        "https://images.unsplash.com/photo-1583939003579-730e3918a45a?q=80&w=2938&auto=format&fit=crop", // Indian cultural vibrant wedding
+        "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=2938&auto=format&fit=crop", // Beautiful floral wedding arch
+        "https://images.unsplash.com/photo-1511285560929-80b456fea0bc?q=80&w=2938&auto=format&fit=crop", // Hands/rings with flowers
+        "https://images.unsplash.com/photo-1519225421980-715cb0215aed?q=80&w=2940&auto=format&fit=crop"  // Warm elegant reception
     ];
 
     useEffect(() => {
