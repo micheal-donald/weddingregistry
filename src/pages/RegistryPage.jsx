@@ -8,6 +8,7 @@ import { Search } from 'lucide-react';
 import Header from '../components/Header';
 import HeroSection from '../components/HeroSection';
 import GiftCard from '../components/GiftCard';
+import GiftCardSkeleton from '../components/GiftCardSkeleton';
 import AddEditGiftModal from '../components/AddEditGiftModal';
 import * as api from '../utils/api';
 
@@ -44,10 +45,28 @@ function RegistryContent() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-4xl mb-4">💍</div>
-          <div className="text-dark/50 font-sans">Gathering our wishes...</div>
+      <div className="min-h-screen bg-background">
+        {/* Skeleton header */}
+        <div className="bg-white/80 border-b border-dark/5 px-6 py-5 animate-pulse">
+          <div className="max-w-6xl mx-auto flex items-center justify-between">
+            <div className="h-8 w-40 bg-dark/5 rounded" />
+            <div className="h-8 w-24 bg-dark/5 rounded-full" />
+          </div>
+        </div>
+        {/* Skeleton hero */}
+        <div className="py-12 px-4 animate-pulse">
+          <div className="max-w-2xl mx-auto text-center space-y-4">
+            <div className="h-10 w-3/4 bg-dark/5 rounded mx-auto" />
+            <div className="h-5 w-1/2 bg-dark/5 rounded mx-auto" />
+          </div>
+        </div>
+        {/* Skeleton gift grid */}
+        <div className="px-4 pb-12">
+          <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <GiftCardSkeleton key={i} />
+            ))}
+          </div>
         </div>
       </div>
     );
