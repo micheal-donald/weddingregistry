@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { RegistryProvider, useRegistry } from '../contexts/RegistryContext';
 import { useGifts } from '../hooks/useGifts';
 import { useAuth } from '../contexts/AuthContext';
+import { Search } from 'lucide-react';
 import Header from '../components/Header';
 import HeroSection from '../components/HeroSection';
 import GiftCard from '../components/GiftCard';
@@ -16,6 +17,25 @@ function RegistryContent() {
 
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
+  const [activeCategory, setActiveCategory] = useState('All');
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const categories = useMemo(() => {
+    const cats = [...new Set(items.map(i => i.category).filter(Boolean))];
+    return ['All', ...cats];
+  }, [items]);
+
+  const filteredItems = useMemo(() => {
+    let result = items;
+    if (activeCategory !== 'All') {
+      result = result.filter(i => i.category === activeCategory);
+    }
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter(i => i.name.toLowerCase().includes(q) || i.category?.toLowerCase().includes(q));
+    }
+    return result;
+  }, [items, activeCategory, searchQuery]);
 
   const loading = configLoading || giftsLoading;
   const error = configError || giftsError;
@@ -93,18 +113,59 @@ function RegistryContent() {
               <p className="text-dark/50">This registry is still being set up. Check back soon!</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {items.map((item) => (
-                <GiftCard
-                  key={item.id}
-                  item={item}
-                  onReserve={handleReserve}
-                  onUnreserve={isAuthenticated ? handleUnreserve : null}
-                  onEdit={isAuthenticated ? setEditingItem : null}
-                  onDelete={isAuthenticated ? handleDeleteGift : null}
-                />
-              ))}
-            </div>
+            <>
+              {/* Search + Category Filters */}
+              <div className="mb-8 space-y-4">
+                <div className="relative max-w-sm">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-dark/30" />
+                  <input
+                    type="text"
+                    placeholder="Search gifts..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2.5 border border-dark/10 rounded-full bg-white focus:ring-2 focus:ring-[var(--color-primary)]/30 focus:border-[var(--color-primary)] transition-colors text-sm"
+                  />
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {categories.map(cat => (
+                    <button
+                      key={cat}
+                      onClick={() => setActiveCategory(cat)}
+                      className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
+                        activeCategory === cat
+                          ? 'bg-[var(--color-primary)] text-white'
+                          : 'bg-white border border-dark/10 text-dark/60 hover:border-[var(--color-primary)]/30 hover:text-dark'
+                      }`}
+                    >
+                      {cat}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {filteredItems.length === 0 ? (
+                <div className="text-center py-12">
+                  <p className="text-dark/50">No gifts match your search.</p>
+                  <button onClick={() => { setSearchQuery(''); setActiveCategory('All'); }}
+                    className="text-[var(--color-primary)] font-medium mt-2 hover:underline">
+                    Clear filters
+                  </button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {filteredItems.map((item) => (
+                    <GiftCard
+                      key={item.id}
+                      item={item}
+                      onReserve={handleReserve}
+                      onUnreserve={isAuthenticated ? handleUnreserve : null}
+                      onEdit={isAuthenticated ? setEditingItem : null}
+                      onDelete={isAuthenticated ? handleDeleteGift : null}
+                    />
+                  ))}
+                </div>
+              )}
+            </>
           )}
         </div>
       </section>
