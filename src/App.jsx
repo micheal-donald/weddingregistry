@@ -1,25 +1,26 @@
-import { Routes, Route } from 'react-router-dom';
-import { AuthProvider } from './contexts/AuthContext';
-import LandingPage from './pages/LandingPage';
-import LoginPage from './pages/LoginPage';
-import RegisterPage from './pages/RegisterPage';
-import DashboardPage from './pages/DashboardPage';
-import OnboardingPage from './pages/OnboardingPage';
-import RegistryPage from './pages/RegistryPage';
-import AdminDashboardPage from './pages/AdminDashboardPage';
+import React from 'react';
+import Navbar from './components/Navbar';
+import Hero from './components/Hero';
+import Features from './components/Features';
+import Philosophy from './components/Philosophy';
+import Protocol from './components/Protocol';
+import Pricing from './components/Pricing';
+import Footer from './components/Footer';
 
-export default function App() {
+function App() {
   return (
-    <AuthProvider>
-      <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-        <Route path="/dashboard" element={<DashboardPage />} />
-        <Route path="/new" element={<OnboardingPage />} />
-        <Route path="/:slug" element={<RegistryPage />} />
-        <Route path="/:slug/admin" element={<AdminDashboardPage />} />
-      </Routes>
-    </AuthProvider>
+    <div className="relative w-full h-full bg-background antialiased selection:bg-accent/30 text-dark">
+      <Navbar />
+      <main>
+        <Hero />
+        <Features />
+        <Philosophy />
+        <Protocol />
+        <Pricing />
+      </main>
+      <Footer />
+    </div>
   );
 }
+
+export default App;

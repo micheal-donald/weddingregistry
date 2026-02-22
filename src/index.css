@@ -2,12 +2,46 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --color-primary: #ec4899;
-  --color-secondary: #f43f5e;
-  --font-display: 'Great Vibes', cursive;
+@layer base {
+  body {
+    @apply bg-background text-dark font-sans antialiased overflow-x-hidden;
+  }
 }
 
-body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+/* Magnetic interaction classes and smooth scroll settings */
+html {
+  scroll-behavior: smooth;
+}
+
+.magnetic-transform {
+  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.magnetic-btn:hover {
+  transform: scale(1.03);
+}
+
+.hover-lift:hover {
+  transform: translateY(-1px);
+}
+
+.fill-transition > span {
+  position: relative;
+  z-index: 10;
+}
+
+.fill-transition::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--tw-bg-hover, transparent);
+  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  z-index: 0;
+}
+
+.fill-transition:hover::after {
+  transform: translateY(-100%);
 }
