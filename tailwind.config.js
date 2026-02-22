@@ -7,10 +7,10 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: '#D4636A',
-        accent: '#C8956C',
-        background: '#FAF7F2',
-        dark: '#2C1810',
+        primary: '#FF6584',
+        accent: '#FFB8B8',
+        background: '#FEF6F8',
+        dark: '#3D2C3A',
       },
       fontFamily: {
         sans: ['"Plus Jakarta Sans"', 'sans-serif'],

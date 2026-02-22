@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import gsap from 'gsap';
 
 export default function Hero() {
@@ -36,12 +37,12 @@ export default function Hero() {
                 </h1>
 
                 <div className="hero-reveal mt-10 flex flex-col sm:flex-row items-center gap-4">
-                    <button className="w-full sm:w-auto px-8 py-4 bg-accent text-background rounded-full font-semibold magnetic-transform hover:scale-105 hover-lift transition-all">
+                    <Link to="/register" className="w-full sm:w-auto px-8 py-4 bg-accent text-background rounded-full font-semibold magnetic-transform hover:scale-105 hover-lift transition-all text-center">
                         Create Your Free Registry
-                    </button>
-                    <button className="w-full sm:w-auto px-8 py-4 border border-background/30 hover:border-background rounded-full font-semibold magnetic-transform hover:scale-105 transition-all text-background hover:bg-background/10">
+                    </Link>
+                    <Link to="/laerke-and-micheal" className="w-full sm:w-auto px-8 py-4 border border-background/30 hover:border-background rounded-full font-semibold magnetic-transform hover:scale-105 transition-all text-background hover:bg-background/10 text-center">
                         See a Demo Registry →
-                    </button>
+                    </Link>
                 </div>
 
                 <div className="hero-reveal mt-8 font-mono text-sm opacity-80 flex items-center gap-3">
