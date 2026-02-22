@@ -268,7 +268,7 @@ export default function GiftCard({ item, onReserve, onUnreserve, onEdit, onDelet
                       <span className="text-xs text-gray-500">Or enter amount:</span>
                       <div className="relative flex-1">
                         <span className="absolute left-2 top-1/2 transform -translate-y-1/2 text-xs text-gray-400">
-                          {getCurrencySymbol(registry?.primaryCurrency)}
+                          {getCurrencySymbol(activeCurrency || registry?.primaryCurrency)}
                         </span>
                         <input
                           type="number"

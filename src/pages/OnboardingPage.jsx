@@ -20,6 +20,7 @@ export default function OnboardingPage() {
     eventLocation: '',
     primaryCurrency: 'USD',
     secondaryCurrency: '',
+    exchangeRate: '',
   });
 
   if (!isAuthenticated) {
@@ -46,6 +47,7 @@ export default function OnboardingPage() {
         eventLocation: form.eventLocation || null,
         primaryCurrency: form.primaryCurrency,
         secondaryCurrency: form.secondaryCurrency || null,
+        exchangeRate: form.exchangeRate ? parseFloat(form.exchangeRate) : null,
       });
 
       navigate(`/${result.registry.slug}/admin`);
@@ -126,6 +128,19 @@ export default function OnboardingPage() {
                 </select>
                 <p className="text-xs text-dark/40 mt-1.5">For international couples — guests can toggle between currencies</p>
               </div>
+
+              {form.secondaryCurrency && (
+                <div>
+                  <label className="block text-sm font-medium text-dark/70 mb-2">
+                    Exchange Rate (1 {form.primaryCurrency} = ? {form.secondaryCurrency})
+                  </label>
+                  <input type="number" step="any" min="0.000001" value={form.exchangeRate}
+                    onChange={(e) => update('exchangeRate', e.target.value)}
+                    className="w-full px-4 py-3 border border-dark/10 rounded-xl focus:ring-2 focus:ring-primary/30 focus:border-primary bg-background/50 transition-colors"
+                    placeholder="e.g. 0.05" />
+                  <p className="text-xs text-dark/40 mt-1.5">How many {form.secondaryCurrency} per 1 {form.primaryCurrency}. You can update this later.</p>
+                </div>
+              )}
 
               {error && (
                 <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">{error}</div>
