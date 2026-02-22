@@ -1,12 +1,10 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
 import { createRegistry } from '../utils/api';
 
 const CURRENCY_OPTIONS = ['USD', 'EUR', 'GBP', 'KES', 'DKK', 'NGN', 'JPY', 'BRL', 'INR', 'AUD', 'CAD'];
 
 export default function OnboardingPage() {
-  const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
   const [step, setStep] = useState(1);
@@ -22,11 +20,6 @@ export default function OnboardingPage() {
     secondaryCurrency: '',
     exchangeRate: '',
   });
-
-  if (!isAuthenticated) {
-    navigate('/login');
-    return null;
-  }
 
   const slug = form.partner1Name && form.partner2Name
     ? `${form.partner1Name}-and-${form.partner2Name}`.toLowerCase().replace(/[^a-z0-9-]/g, '').replace(/-+/g, '-')

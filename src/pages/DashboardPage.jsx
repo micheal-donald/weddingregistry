@@ -1,26 +1,20 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { getMyRegistries } from '../utils/api';
 import { Heart, Plus, ExternalLink } from 'lucide-react';
 
 export default function DashboardPage() {
-  const { user, isAuthenticated, logout } = useAuth();
-  const navigate = useNavigate();
+  const { user, logout } = useAuth();
   const [registries, setRegistries] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      navigate('/login');
-      return;
-    }
-
     getMyRegistries()
       .then(setRegistries)
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, [isAuthenticated, navigate]);
+  }, []);
 
   if (loading) {
     return (
