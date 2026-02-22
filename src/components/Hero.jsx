@@ -21,7 +21,7 @@ export default function Hero() {
             {/* Background with overlay */}
             <div
                 className="absolute inset-0 z-0 bg-cover bg-center"
-                style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1511285560929-80b456fea0bc?q=80&w=2938&auto=format&fit=crop")' }}
+                style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1542458428-569bda29cbea?q=80&w=2938&auto=format&fit=crop")' }}
             >
                 <div className="absolute inset-0 bg-gradient-to-t from-dark via-dark/70 to-transparent"></div>
             </div>
@@ -32,15 +32,15 @@ export default function Hero() {
                         Your love story
                     </span>
                     <span className="hero-reveal block font-serif italic text-5xl md:text-7xl lg:text-8xl leading-[1.1]">
-                        deserves <span className="text-accent">better</span> than a spreadsheet.
+                        deserves <span className="text-secondary">better</span> than a spreadsheet.
                     </span>
                 </h1>
 
                 <div className="hero-reveal mt-10 flex flex-col sm:flex-row items-center gap-4">
-                    <Link to="/register" className="w-full sm:w-auto px-8 py-4 bg-accent text-background rounded-full font-semibold magnetic-transform hover:scale-105 hover-lift transition-all text-center">
+                    <Link to="/register" className="w-full sm:w-auto px-8 py-4 bg-primary text-background rounded-full font-semibold magnetic-transform hover:scale-105 hover-lift transition-all text-center">
                         Create Your Free Registry
                     </Link>
-                    <Link to="/laerke-and-micheal" className="w-full sm:w-auto px-8 py-4 border border-background/30 hover:border-background rounded-full font-semibold magnetic-transform hover:scale-105 transition-all text-background hover:bg-background/10 text-center">
+                    <Link to="/laerke-and-micheal" className="w-full sm:w-auto px-8 py-4 border border-sage/60 text-sage hover:bg-sage/10 rounded-full font-semibold magnetic-transform hover:scale-105 transition-all text-center">
                         See a Demo Registry →
                     </Link>
                 </div>

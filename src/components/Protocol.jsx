@@ -10,7 +10,7 @@ const steps = [
         title: 'Build your dream list in minutes.',
         desc: 'Sign up free. Add gifts from any store in the world — paste a URL or add manually. Set your currencies, pick your colors.',
         Animation: () => (
-            <svg viewBox="0 0 100 100" className="w-full h-full stroke-primary max-w-[200px]" fill="none" strokeWidth="2">
+            <svg viewBox="0 0 100 100" className="w-full h-full stroke-sage max-w-[200px]" fill="none" strokeWidth="2">
                 <rect x="25" y="40" width="50" height="40" rx="4" className="gift-box-path stroke-dashoffset-anim" />
                 <path d="M 20 40 L 80 40" className="gift-box-path stroke-dashoffset-anim" />
                 <path d="M 50 40 L 50 80" className="gift-box-path stroke-dashoffset-anim" />
@@ -31,7 +31,7 @@ const steps = [
                     </svg>
                 </div>
                 {[1, 2, 3].map(i => (
-                    <div key={i} className={`absolute w-32 h-32 border border-primary/40 rounded-full animate-ping`} style={{ animationDuration: '3s', animationDelay: `${i * 1}s` }}></div>
+                    <div key={i} className={`absolute w-32 h-32 border border-sage/60 rounded-full animate-ping`} style={{ animationDuration: '3s', animationDelay: `${i * 1}s` }}></div>
                 ))}
                 {/* Flags floating */}
                 <span className="absolute top-10 left-10 text-xl animate-bounce" style={{ animationDelay: '0.2s' }}>🇰🇪</span>
@@ -46,7 +46,7 @@ const steps = [
         desc: 'Track reservations in real-time. See your progress. Export guest lists. Focus on your big day — we handle the rest.',
         Animation: () => (
             <div className="relative w-full h-full flex items-center justify-center">
-                <svg viewBox="0 0 200 100" className="w-full h-auto stroke-primary max-w-[250px]" fill="none" strokeWidth="2">
+                <svg viewBox="0 0 200 100" className="w-full h-auto stroke-sage max-w-[250px]" fill="none" strokeWidth="2">
                     <path d="M 10 50 L 40 50 L 50 20 L 70 80 L 80 50 L 190 50" className="ekg-path stroke-dashoffset-anim" />
                 </svg>
                 <div className="absolute top-4 right-16 text-xl animate-pulse">🎁</div>

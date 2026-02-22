@@ -7,30 +7,30 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 md:gap-8 mb-20">
           <div className="md:col-span-1">
             <h3 className="font-serif italic text-4xl font-bold mb-4 text-accent">Gifted</h3>
-            <p className="text-background/70 font-sans text-sm leading-relaxed max-w-xs">
+            <p className="text-background/80 font-sans text-sm leading-relaxed max-w-xs">
               The gift registry built for couples anywhere in the world.
             </p>
           </div>
 
           <div className="md:col-span-1">
-            <h4 className="font-mono text-xs uppercase tracking-widest text-background/50 mb-6 font-semibold">Product</h4>
+            <h4 className="font-mono text-xs uppercase tracking-widest text-background/70 mb-6 font-semibold">Product</h4>
             <ul className="flex flex-col gap-4 text-sm">
               <li><a href="#features" className="hover:text-accent transition-colors">Features</a></li>
               <li><a href="#how-it-works" className="hover:text-accent transition-colors">How it Works</a></li>
               <li><a href="#pricing" className="hover:text-accent transition-colors">Pricing</a></li>
               <li><Link to="/laerke-and-micheal" className="hover:text-accent transition-colors">Demo Registry</Link></li>
-              <li><span className="opacity-50 cursor-not-allowed">API (Coming Soon)</span></li>
+              <li><span className="opacity-70 cursor-not-allowed">API (Coming Soon)</span></li>
             </ul>
           </div>
 
           <div className="md:col-span-1">
-            <h4 className="font-mono text-xs uppercase tracking-widest text-background/50 mb-6 font-semibold">Company</h4>
+            <h4 className="font-mono text-xs uppercase tracking-widest text-background/70 mb-6 font-semibold">Company</h4>
             <ul className="flex flex-col gap-4 text-sm">
-              <li><span className="opacity-50 cursor-not-allowed">About</span></li>
-              <li><span className="opacity-50 cursor-not-allowed">Blog</span></li>
-              <li><span className="opacity-50 cursor-not-allowed">Contact</span></li>
-              <li><span className="opacity-50 cursor-not-allowed">Privacy Policy</span></li>
-              <li><span className="opacity-50 cursor-not-allowed">Terms</span></li>
+              <li><span className="opacity-70 cursor-not-allowed">About</span></li>
+              <li><span className="opacity-70 cursor-not-allowed">Blog</span></li>
+              <li><span className="opacity-70 cursor-not-allowed">Contact</span></li>
+              <li><span className="opacity-70 cursor-not-allowed">Privacy Policy</span></li>
+              <li><span className="opacity-70 cursor-not-allowed">Terms</span></li>
             </ul>
           </div>
 
@@ -58,7 +58,7 @@ export default function Footer() {
             <span className="text-background/80 tracking-widest uppercase">All systems operational</span>
           </div>
 
-          <div className="text-background/40 text-sm font-sans text-center">
+          <div className="text-background/60 text-sm font-sans text-center">
             &copy; 2026 Gifted. Made with love across borders.
           </div>
         </div>

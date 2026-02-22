@@ -48,12 +48,12 @@ export default function Philosophy() {
             ></div>
 
             <div className="relative z-10 w-full max-w-4xl text-center manifesto-text">
-                <p className="text-background/60 font-mono text-sm uppercase tracking-widest mb-8 max-w-md mx-auto">
+                <p className="text-background/80 font-mono text-sm uppercase tracking-widest mb-8 max-w-md mx-auto">
                     Most registries are built for: American couples shopping at American stores.
                 </p>
                 <h2 className="word-reveal font-serif italic text-5xl md:text-7xl lg:text-8xl text-background leading-tight flex flex-wrap justify-center inline-block">
                     {'We\'re built for: love that'.split(' ').map((word, i) => (
-                        <span key={i} className="inline-block mr-[0.2em]">{word}</span>
+                        <span key={`${word}-${i}`} className="inline-block mr-[0.2em]">{word}</span>
                     ))}
                     <span className="text-accent inline-block">crosses borders.</span>
                 </h2>

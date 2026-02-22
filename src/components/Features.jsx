@@ -101,7 +101,7 @@ export default function Features() {
 
             <div className="grid md:grid-cols-3 gap-8">
                 {/* Card 1: Currency Carousel */}
-                <div className="bg-white border rounded-[2rem] p-8 shadow-sm hover:shadow-md transition-shadow flex flex-col items-center text-center h-[420px] justify-between relative overflow-hidden">
+                <div className="bg-sage/10 border border-sage/30 rounded-[2rem] p-8 shadow-sm hover:shadow-md transition-shadow flex flex-col items-center text-center h-[420px] justify-between relative overflow-hidden">
                     <div className="w-full flex-1 flex items-center justify-center relative mt-6">
                         {currencies.map((curr, idx) => {
                             const offset = (idx - activeCurrency + currencies.length) % currencies.length;
@@ -113,7 +113,7 @@ export default function Features() {
                             return (
                                 <div
                                     key={idx}
-                                    className="absolute bg-background border px-6 py-4 rounded-xl font-mono text-xl shadow-sm transition-all duration-700 w-48"
+                                    className="absolute bg-background border border-secondary/30 px-6 py-4 rounded-xl font-mono text-xl shadow-sm transition-all duration-700 w-48"
                                     style={{
                                         transform: `translateY(${y}px) scale(${scale})`,
                                         opacity,
@@ -134,7 +134,7 @@ export default function Features() {
                 </div>
 
                 {/* Card 2: Crowdfund Live Feed */}
-                <div className="bg-white border rounded-[2rem] p-8 shadow-sm hover:shadow-md transition-shadow flex flex-col h-[420px] justify-between">
+                <div className="bg-sage/10 border border-sage/30 rounded-[2rem] p-8 shadow-sm hover:shadow-md transition-shadow flex flex-col h-[420px] justify-between">
                     <div className="w-full bg-dark/5 rounded-2xl p-5 mt-6 font-mono text-xs overflow-hidden h-32 relative border border-dark/10 shadow-inner">
                         <div className="flex items-center gap-2 mb-3 font-semibold text-primary">
                             <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span> Live
@@ -145,7 +145,7 @@ export default function Features() {
                         </div>
                     </div>
 
-                    <div className="w-full mt-4 bg-dark/10 h-3 rounded-full overflow-hidden relative">
+                    <div className="w-full mt-4 bg-sage/20 h-3 rounded-full overflow-hidden relative">
                         <div
                             className="absolute left-0 top-0 h-full bg-accent transition-all duration-700 ease-out rounded-full"
                             style={{ width: `${progress}%` }}
@@ -159,7 +159,7 @@ export default function Features() {
                 </div>
 
                 {/* Card 3: Privacy Preview */}
-                <div className="bg-white border rounded-[2rem] p-8 shadow-sm hover:shadow-md transition-shadow flex flex-col h-[420px] justify-between items-center text-center">
+                <div className="bg-sage/10 border border-sage/30 rounded-[2rem] p-8 shadow-sm hover:shadow-md transition-shadow flex flex-col h-[420px] justify-between items-center text-center">
                     <div className="w-full flex-1 flex flex-col items-center justify-center mt-6">
                         <div className="text-sm font-semibold uppercase tracking-widest text-dark/40 mb-3">Guest Input</div>
                         <div className="border border-dark/20 bg-background rounded-full px-6 py-2 w-48 flex justify-center text-lg font-mono">
@@ -167,7 +167,7 @@ export default function Features() {
                         </div>
                         <div className="mt-6 flex flex-col items-center">
                             <div className="text-xs text-dark/50 mb-1">Public Registry View</div>
-                            <div className="bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-mono flex items-center shadow-sm">
+                            <div className="bg-secondary/20 text-primary px-4 py-2 rounded-full text-sm font-mono flex items-center shadow-sm">
                                 Reserved by: <span className="ml-2 font-bold privacy-card-name">{privacyName.includes('.') ? privacyName : '...'}</span>
                             </div>
                         </div>

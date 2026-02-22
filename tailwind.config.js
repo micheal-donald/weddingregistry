@@ -7,10 +7,12 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: '#FF6584',
-        accent: '#FFB8B8',
-        background: '#FEF6F8',
-        dark: '#3D2C3A',
+        primary: '#66507A',     // Deep Purple
+        secondary: '#AC9BC0',   // Soft Lilac
+        accent: '#B48A3A',      // Gold
+        sage: '#8BA495',        // Sage Green
+        background: '#F5EFE1',  // Pale Cream
+        dark: '#3A2A47',        // Deep Plum
       },
       fontFamily: {
         sans: ['"Plus Jakarta Sans"', 'sans-serif'],
