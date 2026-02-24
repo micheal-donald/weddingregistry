@@ -98,6 +98,11 @@ function RegistryContent() {
     }
   };
 
+  const handlePaymentSuccess = async () => {
+    await refetch();
+    addToast('Payment confirmed! Thank you for your gift.');
+  };
+
   const handleUnreserve = async (giftId) => {
     if (!confirm('Are you sure you want to unreserve this gift?')) return;
     try {
@@ -207,6 +212,7 @@ function RegistryContent() {
                       onUnreserve={isAuthenticated ? handleUnreserve : null}
                       onEdit={isAuthenticated ? setEditingItem : null}
                       onDelete={isAuthenticated ? handleDeleteGift : null}
+                      onPaymentSuccess={handlePaymentSuccess}
                     />
                   ))}
                 </div>

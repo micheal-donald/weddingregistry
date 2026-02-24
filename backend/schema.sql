@@ -135,3 +135,43 @@ CREATE TABLE admins (
     password_hash TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- ============================================================
+-- MPESA_PAYMENTS: M-Pesa STK Push payment records
+-- Tracks payment lifecycle: pending → completed | failed | cancelled | timeout
+-- account_reference = {SLUG_PREFIX}{GIFT_ID} for per-couple, per-gift traceability
+-- ============================================================
+CREATE TABLE mpesa_payments (
+    id SERIAL PRIMARY KEY,
+    registry_id UUID NOT NULL REFERENCES registries(id) ON DELETE CASCADE,
+    gift_id INTEGER NOT NULL REFERENCES gifts(id) ON DELETE CASCADE,
+    reservation_id INTEGER REFERENCES partial_reservations(id) ON DELETE SET NULL,
+    guest_id INTEGER NOT NULL REFERENCES guests(id) ON DELETE CASCADE,
+
+    -- M-Pesa identifiers
+    checkout_request_id VARCHAR(100) UNIQUE,
+    merchant_request_id VARCHAR(100),
+    account_reference VARCHAR(12) NOT NULL,
+
+    -- Payment details
+    amount DECIMAL(10, 2) NOT NULL,
+    percentage_reserved DECIMAL(5, 2) NOT NULL DEFAULT 0,
+    phone_number VARCHAR(20) NOT NULL,
+    notes TEXT,
+
+    -- Status: pending → completed | failed | cancelled | timeout
+    status VARCHAR(20) NOT NULL DEFAULT 'pending',
+
+    -- M-Pesa confirmation data (populated on callback)
+    mpesa_receipt_number VARCHAR(50),
+    mpesa_transaction_date BIGINT,
+    result_code INTEGER,
+    result_desc TEXT,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_mpesa_payments_checkout ON mpesa_payments(checkout_request_id);
+CREATE INDEX idx_mpesa_payments_gift ON mpesa_payments(gift_id);
+CREATE INDEX idx_mpesa_payments_registry ON mpesa_payments(registry_id);

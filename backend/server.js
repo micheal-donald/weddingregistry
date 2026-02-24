@@ -5,6 +5,8 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const bodyParser = require('body-parser');
 const path = require('path');
+const https = require('https');
+const http = require('http');
 
 // Bypass SSL certificate validation for Supabase in production
 if (process.env.DATABASE_URL) {
@@ -29,6 +31,203 @@ const pool = new Pool(dbConfig);
 pool.on('error', (err) => console.error('Unexpected database error:', err));
 
 const query = (text, params) => pool.query(text, params);
+
+// ============================================================
+// M-PESA SERVICE
+// ============================================================
+
+function mpesaHttpRequest(method, urlString, data, headers = {}) {
+    return new Promise((resolve, reject) => {
+        const urlObj = new URL(urlString);
+        const lib = urlObj.protocol === 'https:' ? https : http;
+        const body = data ? JSON.stringify(data) : null;
+        const options = {
+            hostname: urlObj.hostname,
+            port: urlObj.port || (urlObj.protocol === 'https:' ? 443 : 80),
+            path: urlObj.pathname + urlObj.search,
+            method,
+            headers: {
+                'Content-Type': 'application/json',
+                ...(body ? { 'Content-Length': Buffer.byteLength(body) } : {}),
+                ...headers
+            },
+            timeout: 15000
+        };
+
+        const req = lib.request(options, (res) => {
+            let responseBody = '';
+            res.on('data', chunk => responseBody += chunk);
+            res.on('end', () => {
+                try {
+                    const parsed = JSON.parse(responseBody);
+                    if (res.statusCode >= 200 && res.statusCode < 300) {
+                        resolve({ data: parsed, status: res.statusCode });
+                    } else {
+                        const err = new Error(parsed.errorMessage || parsed.ResponseDescription || `HTTP ${res.statusCode}`);
+                        err.response = { data: parsed, status: res.statusCode };
+                        reject(err);
+                    }
+                } catch (e) {
+                    reject(new Error(`Invalid M-Pesa response: ${responseBody.substring(0, 200)}`));
+                }
+            });
+        });
+
+        req.on('error', reject);
+        req.on('timeout', () => {
+            req.destroy();
+            const err = new Error('M-Pesa request timed out after 15s');
+            err.code = 'ECONNABORTED';
+            reject(err);
+        });
+
+        if (body) req.write(body);
+        req.end();
+    });
+}
+
+class MpesaService {
+    constructor() {
+        this.consumerKey = process.env.MPESA_CONSUMER_KEY;
+        this.consumerSecret = process.env.MPESA_CONSUMER_SECRET;
+        this.shortcode = process.env.MPESA_SHORTCODE;
+        this.passkey = process.env.MPESA_PASSKEY;
+        this.callbackUrl = process.env.MPESA_CALLBACK_URL;
+        this.timeoutUrl = process.env.MPESA_TIMEOUT_URL || process.env.MPESA_CALLBACK_URL;
+        this.environment = process.env.MPESA_ENVIRONMENT || 'sandbox';
+        this.baseUrl = this.environment === 'production'
+            ? 'https://api.safaricom.co.ke'
+            : 'https://sandbox.safaricom.co.ke';
+        this.accessToken = null;
+        this.tokenExpiry = null;
+    }
+
+    isConfigured() {
+        return !!(this.consumerKey && this.consumerSecret && this.shortcode && this.passkey && this.callbackUrl);
+    }
+
+    getMpesaTimestamp() {
+        const now = new Date();
+        return [
+            now.getFullYear(),
+            String(now.getMonth() + 1).padStart(2, '0'),
+            String(now.getDate()).padStart(2, '0'),
+            String(now.getHours()).padStart(2, '0'),
+            String(now.getMinutes()).padStart(2, '0'),
+            String(now.getSeconds()).padStart(2, '0')
+        ].join('');
+    }
+
+    generatePassword(timestamp) {
+        return Buffer.from(`${this.shortcode}${this.passkey}${timestamp}`).toString('base64');
+    }
+
+    formatPhone(phone) {
+        let p = phone.toString().replace(/[\s\-\(\)]/g, '');
+        if (p.startsWith('0')) p = '254' + p.substring(1);
+        else if (p.startsWith('+254')) p = p.substring(1);
+        else if (!p.startsWith('254')) throw new Error('Phone must start with 0, +254, or 254');
+        if (!/^254\d{9}$/.test(p)) throw new Error('Invalid Kenyan phone number — must be 12 digits (e.g. 0712345678)');
+        return p;
+    }
+
+    createAccountRef(slug, giftId) {
+        const prefix = slug.replace(/-/g, '').toUpperCase().substring(0, 6);
+        return `${prefix}${giftId}`.substring(0, 12);
+    }
+
+    async getAccessToken() {
+        if (this.accessToken && this.tokenExpiry && Date.now() < this.tokenExpiry) {
+            return this.accessToken;
+        }
+        const auth = Buffer.from(`${this.consumerKey}:${this.consumerSecret}`).toString('base64');
+        const { data } = await mpesaHttpRequest(
+            'GET',
+            `${this.baseUrl}/oauth/v1/generate?grant_type=client_credentials`,
+            null,
+            { Authorization: `Basic ${auth}` }
+        );
+        if (!data.access_token) throw new Error('No access_token in M-Pesa response');
+        this.accessToken = data.access_token;
+        this.tokenExpiry = Date.now() + 55 * 60 * 1000;
+        return this.accessToken;
+    }
+
+    async initiateSTKPush({ amount, phoneNumber, slug, giftId, description }) {
+        const token = await this.getAccessToken();
+        const timestamp = this.getMpesaTimestamp();
+        const password = this.generatePassword(timestamp);
+        const formattedPhone = this.formatPhone(phoneNumber);
+        const accountReference = this.createAccountRef(slug, giftId);
+        const intAmount = Math.round(parseFloat(amount));
+        if (intAmount < 1) throw new Error('Minimum payment amount is KES 1');
+
+        const payload = {
+            BusinessShortCode: this.shortcode,
+            Password: password,
+            Timestamp: timestamp,
+            TransactionType: 'CustomerPayBillOnline',
+            Amount: intAmount,
+            PartyA: formattedPhone,
+            PartyB: this.shortcode,
+            PhoneNumber: formattedPhone,
+            CallBackURL: this.callbackUrl,
+            AccountReference: accountReference,
+            TransactionDesc: (description || 'Wedding Gift').substring(0, 13)
+        };
+
+        const { data } = await mpesaHttpRequest(
+            'POST',
+            `${this.baseUrl}/mpesa/stkpush/v1/processrequest`,
+            payload,
+            { Authorization: `Bearer ${token}` }
+        );
+
+        if (data.ResponseCode !== '0') {
+            throw new Error(data.ResponseDescription || 'STK Push initiation failed');
+        }
+
+        return {
+            checkoutRequestId: data.CheckoutRequestID,
+            merchantRequestId: data.MerchantRequestID,
+            accountReference,
+            customerMessage: data.CustomerMessage
+        };
+    }
+
+    async querySTKStatus(checkoutRequestId) {
+        const token = await this.getAccessToken();
+        const timestamp = this.getMpesaTimestamp();
+        const password = this.generatePassword(timestamp);
+        const { data } = await mpesaHttpRequest(
+            'POST',
+            `${this.baseUrl}/mpesa/stkpushquery/v1/query`,
+            { BusinessShortCode: this.shortcode, Password: password, Timestamp: timestamp, CheckoutRequestID: checkoutRequestId },
+            { Authorization: `Bearer ${token}` }
+        );
+        return data;
+    }
+
+    mapResultCode(code) {
+        const map = { 0: 'completed', 1032: 'cancelled', 1037: 'timeout', 1: 'failed', 26: 'failed', 1019: 'failed', 1036: 'failed' };
+        return map[parseInt(code)] || 'failed';
+    }
+
+    getUserMessage(code) {
+        const map = {
+            0: 'Payment confirmed! Thank you for your gift.',
+            1032: 'Payment cancelled.',
+            1037: 'Payment timed out — PIN was not entered in time.',
+            1: 'Insufficient M-Pesa funds.',
+            26: 'M-Pesa is busy. Please try again.',
+            1019: 'Payment request expired.',
+            1036: 'Payment failed. Please try again.'
+        };
+        return map[parseInt(code)] || 'Payment processing failed. Please try again.';
+    }
+}
+
+const mpesa = new MpesaService();
 
 // ============================================================
 // MIDDLEWARE
@@ -591,6 +790,249 @@ app.delete('/api/r/:slug/admin/gifts/:id', authenticateToken, resolveRegistry, r
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
+});
+
+// ============================================================
+// M-PESA PAYMENT ROUTES
+// ============================================================
+
+app.post('/api/r/:slug/gifts/:id/mpesa', resolveRegistry, async (req, res) => {
+    if (!mpesa.isConfigured()) {
+        return res.status(503).json({ error: 'M-Pesa payments are not configured on this server' });
+    }
+
+    const giftId = req.params.id;
+    const registryId = req.registry.id;
+    const slug = req.params.slug;
+    const { guestName, guestEmail, guestPhone, amount, percentage, notes } = req.body;
+
+    if (!guestName) return res.status(400).json({ error: 'Guest name is required' });
+    if (!guestPhone) return res.status(400).json({ error: 'Phone number is required for M-Pesa payment' });
+
+    let formattedPhone;
+    try {
+        formattedPhone = mpesa.formatPhone(guestPhone);
+    } catch (err) {
+        return res.status(400).json({ error: err.message });
+    }
+
+    try {
+        const client = await pool.connect();
+        try {
+            await client.query('BEGIN');
+
+            const { rows: [gift] } = await client.query(
+                'SELECT * FROM gifts WHERE id = $1 AND registry_id = $2', [giftId, registryId]
+            );
+            if (!gift) throw new Error('Gift not found');
+
+            const giftQuantity = gift.quantity || 1;
+            const giftPrice = parseFloat(gift.price);
+            let paymentAmount, reservedPercentage;
+
+            if (gift.allow_partial_reservations) {
+                if (!amount && !percentage) throw new Error('Either amount or percentage must be specified');
+                paymentAmount = amount ? parseFloat(amount) : (parseFloat(percentage) * giftPrice / 100);
+                reservedPercentage = percentage ? parseFloat(percentage) : (parseFloat(amount) * 100 / giftPrice);
+            } else if (giftQuantity > 1) {
+                paymentAmount = giftPrice;
+                reservedPercentage = 0;
+            } else {
+                paymentAmount = giftPrice;
+                reservedPercentage = 100;
+            }
+
+            const { rows: [avail] } = await client.query(
+                'SELECT COALESCE(SUM(percentage_reserved), 0) as total, COUNT(*) as count FROM partial_reservations WHERE gift_id = $1',
+                [giftId]
+            );
+            const totalReserved = parseFloat(avail.total);
+            const count = parseInt(avail.count);
+
+            if (gift.allow_partial_reservations) {
+                if (totalReserved + reservedPercentage > 100.01)
+                    throw new Error(`Only ${(100 - totalReserved).toFixed(1)}% of this gift is still available`);
+            } else if (giftQuantity > 1) {
+                if (count >= giftQuantity) throw new Error(`All ${giftQuantity} units of this gift have been reserved`);
+            } else {
+                if (totalReserved >= 99.9) throw new Error('This gift has already been reserved');
+            }
+
+            let guestId;
+            const checkGuest = await client.query(
+                'SELECT id FROM guests WHERE name = $1 AND registry_id = $2', [guestName, registryId]
+            );
+            if (checkGuest.rows.length > 0) {
+                guestId = checkGuest.rows[0].id;
+                await client.query(
+                    'UPDATE guests SET email = COALESCE($1, email), phone = COALESCE($2, phone) WHERE id = $3',
+                    [guestEmail || null, formattedPhone, guestId]
+                );
+            } else {
+                const newGuest = await client.query(
+                    'INSERT INTO guests (registry_id, name, email, phone) VALUES ($1, $2, $3, $4) RETURNING id',
+                    [registryId, guestName, guestEmail || null, formattedPhone]
+                );
+                guestId = newGuest.rows[0].id;
+            }
+
+            const accountRef = mpesa.createAccountRef(slug, giftId);
+            const { rows: [payment] } = await client.query(
+                `INSERT INTO mpesa_payments
+                    (registry_id, gift_id, guest_id, account_reference, amount, percentage_reserved, phone_number, notes, status)
+                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'pending')
+                 RETURNING id`,
+                [registryId, giftId, guestId, accountRef, paymentAmount, reservedPercentage, formattedPhone, notes || null]
+            );
+
+            await client.query('COMMIT');
+
+            let stkResult;
+            try {
+                stkResult = await mpesa.initiateSTKPush({
+                    amount: paymentAmount,
+                    phoneNumber: formattedPhone,
+                    slug,
+                    giftId,
+                    description: `${gift.name.substring(0, 8)} Gift`
+                });
+            } catch (stkErr) {
+                await query(
+                    "UPDATE mpesa_payments SET status = 'failed', result_desc = $1, updated_at = NOW() WHERE id = $2",
+                    [stkErr.message, payment.id]
+                );
+                throw stkErr;
+            }
+
+            await query(
+                'UPDATE mpesa_payments SET checkout_request_id = $1, merchant_request_id = $2, updated_at = NOW() WHERE id = $3',
+                [stkResult.checkoutRequestId, stkResult.merchantRequestId, payment.id]
+            );
+
+            res.json({
+                success: true,
+                paymentId: payment.id,
+                checkoutRequestId: stkResult.checkoutRequestId,
+                accountReference: stkResult.accountReference,
+                customerMessage: stkResult.customerMessage || 'Check your phone for an M-Pesa prompt',
+                amount: paymentAmount
+            });
+
+        } catch (e) {
+            await client.query('ROLLBACK');
+            throw e;
+        } finally {
+            client.release();
+        }
+    } catch (err) {
+        const isClientError = ['required', 'available', 'found', 'Phone', 'reserved', 'units', 'Minimum', 'Invalid']
+            .some(s => err.message.includes(s));
+        res.status(isClientError ? 400 : 500).json({ error: err.message });
+    }
+});
+
+app.get('/api/payments/:checkoutId/status', async (req, res) => {
+    const { checkoutId } = req.params;
+    try {
+        const { rows: [payment] } = await query(
+            `SELECT id, status, mpesa_receipt_number, result_code, result_desc, amount, updated_at
+             FROM mpesa_payments WHERE checkout_request_id = $1`,
+            [checkoutId]
+        );
+        if (!payment) return res.status(404).json({ error: 'Payment not found' });
+        res.json({
+            paymentId: payment.id,
+            status: payment.status,
+            receiptNumber: payment.mpesa_receipt_number,
+            amount: payment.amount ? parseFloat(payment.amount) : null,
+            message: payment.result_desc || null,
+            updatedAt: payment.updated_at
+        });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+async function processMpesaCallback(stkCallback) {
+    const { CheckoutRequestID, ResultCode, ResultDesc, CallbackMetadata } = stkCallback;
+    if (!CheckoutRequestID) return;
+
+    const newStatus = mpesa.mapResultCode(ResultCode);
+    let receiptNumber = null, transactionDate = null;
+    if (ResultCode === 0 && CallbackMetadata?.Item) {
+        for (const item of CallbackMetadata.Item) {
+            if (item.Name === 'MpesaReceiptNumber') receiptNumber = String(item.Value);
+            if (item.Name === 'TransactionDate') transactionDate = item.Value;
+        }
+    }
+
+    const { rows: [payment] } = await query(
+        'SELECT * FROM mpesa_payments WHERE checkout_request_id = $1', [CheckoutRequestID]
+    );
+    if (!payment || payment.status !== 'pending') return;
+
+    const client = await pool.connect();
+    try {
+        await client.query('BEGIN');
+        await client.query(
+            `UPDATE mpesa_payments
+             SET status = $1, result_code = $2, result_desc = $3,
+                 mpesa_receipt_number = $4, mpesa_transaction_date = $5, updated_at = NOW()
+             WHERE id = $6`,
+            [newStatus, ResultCode, ResultDesc, receiptNumber, transactionDate, payment.id]
+        );
+
+        if (newStatus === 'completed') {
+            const { rows: [gift] } = await client.query('SELECT id FROM gifts WHERE id = $1', [payment.gift_id]);
+            if (gift) {
+                const { rows: [resRow] } = await client.query(
+                    `INSERT INTO partial_reservations (gift_id, guest_id, amount_reserved, percentage_reserved, notes)
+                     VALUES ($1, $2, $3, $4, $5) RETURNING id`,
+                    [payment.gift_id, payment.guest_id, payment.amount, payment.percentage_reserved, payment.notes]
+                );
+                await client.query(
+                    'UPDATE mpesa_payments SET reservation_id = $1 WHERE id = $2',
+                    [resRow.id, payment.id]
+                );
+            }
+        }
+
+        await client.query('COMMIT');
+    } catch (e) {
+        await client.query('ROLLBACK');
+        throw e;
+    } finally {
+        client.release();
+    }
+}
+
+app.post('/api/webhooks/mpesa/callback', async (req, res) => {
+    const stkCallback = req.body?.Body?.stkCallback;
+    if (stkCallback) {
+        try {
+            await processMpesaCallback(stkCallback);
+        } catch (e) {
+            console.error('M-Pesa callback processing error:', e.message);
+        }
+    }
+    res.status(200).json({ ResultCode: 0, ResultDesc: 'Accepted' });
+});
+
+app.post('/api/webhooks/mpesa/timeout', async (req, res) => {
+    const checkoutId = req.body?.Body?.stkCallback?.CheckoutRequestID;
+    if (checkoutId) {
+        try {
+            await query(
+                `UPDATE mpesa_payments
+                 SET status = 'timeout', result_desc = 'STK Push timed out — no PIN entered', updated_at = NOW()
+                 WHERE checkout_request_id = $1 AND status = 'pending'`,
+                [checkoutId]
+            );
+        } catch (e) {
+            console.error('M-Pesa timeout webhook error:', e.message);
+        }
+    }
+    res.status(200).json({ ResultCode: 0, ResultDesc: 'Accepted' });
 });
 
 // ============================================================

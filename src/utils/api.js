@@ -53,6 +53,13 @@ export const reserveGift = (slug, giftId, data) =>
 export const unreserveGift = (slug, giftId) =>
   apiFetch(`/r/${slug}/gifts/${giftId}/reserve`, { method: 'DELETE' });
 
+// M-Pesa payments
+export const initiatePayment = (slug, giftId, data) =>
+  apiFetch(`/r/${slug}/gifts/${giftId}/mpesa`, { method: 'POST', body: JSON.stringify(data) });
+
+export const getPaymentStatus = (checkoutId) =>
+  apiFetch(`/payments/${checkoutId}/status`);
+
 // Admin gifts
 export const getReservations = (slug) =>
   apiFetch(`/r/${slug}/admin/reservations`);
